@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>升官大富翁 - 宫廷晋升版</title>
+    <style>
+        :root {
+            --bg-color: #c8a96e;
+            --paper-color: #e8d5a0;
+            --border-color: #8B1A1A;
+            --cell-size: 1fr;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "STKaiti", "KaiTi", "华文楷体", "楷体", serif;
+            background: var(--bg-color);
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .outer-wrapper {
+            background: var(--paper-color);
+            border: 5px double var(--border-color);
+            max-width: 900px;
+            width: 100%;
+            padding: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .layout {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        /* 棋盘容器 - 保持比例 */
+        .board-container {
+            flex: 2;
+            min-width: 320px;
+            position: relative;
+        }
+
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(11, 1fr);
+            grid-template-rows: repeat(11, 1fr);
+            gap: 1px;
+            background: var(--border-color);
+            border: 2px solid var(--border-color);
+            aspect-ratio: 1 / 1;
+            position: relative;
+        }
+
+        .cell {
+            background: var(--paper-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            padding: 1px;
+            position: relative;
+            overflow: hidden;
+            line-height: 1.1;
+            text-align: center;
+        }
+
+        /* 官阶颜色区分 */
+        .cell[data-rank^="一"], .cell[data-rank^="二"] { background: #fdf2f2; } /* 高级 */
+        .cell[data-rank^="九"], .cell[data-rank="白丁"] { background: #f0f0f0; } /* 低级 */
+
+        .c-rank { color: #666; font-size: 7px; margin-bottom: 2px; }
+        .c-name { font-weight: bold; color: #333; }
+
+        /* 棋子（小人）样式 */
+        .piece {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+        }
+
+        .piece-body {
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        .piece-label {
+            font-size: 8px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 4px;
+            padding: 0 2px;
+            white-space: nowrap;
+        }
+
+        /* 控制面板 */
+        .controls {
+            flex: 1;
+            min-width: 200px;
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .dice-area {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        #dice-el {
+            font-size: 60px;
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: var(--border-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 16px;
+            border-radius: 4px;
+        }
+
+        button:disabled { background: #999; }
+
+        .log-box {
+            height: 200px;
+            overflow-y: auto;
+            background: #fff;
+            padding: 8px;
+            font-size: 13px;
+            border: 1px solid #ccc;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .layout { flex-direction: column; }
+            .board-container { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="outer-wrapper">
+    <div class="layout">
+        <div class="board-container">
+            <div id="board" class="board-grid"></div>
+            <div id="pieces-layer"></div>
+        </div>
+
+        <div class="controls">
+            <h2 style="color:var(--border-color); text-align:center">升官图</h2>
+            <div id="status" style="margin-top:10px; font-weight:bold">等待开局...</div>
+            
+            <div class="dice-area">
+                <span id="dice-el">🎲</span>
+                <button id="roll-btn" onclick="doRoll()">掷骰子</button>
+            </div>
+
+            <div class="log-box" id="log">
+                <div>欢迎来到大清吏部。</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 官职配置
+const RAW_OFFICES = [
+    {n:"白丁", r:"无", d:"一介布衣"},
+    {n:"童生", r:"无", d:"初入文林"},
+    {n:"秀才", r:"无", d:"身怀功名"},
+    {n:"举人", r:"无", d:"省级人才"},
+    {n:"典史", r:"九品", d:"县衙捉刀"},
+    {n:"主簿", r:"九品", d:"县丞辅佐"},
+    {n:"县丞", r:"八品", d:"一县之贰"},
+    {n:"教谕", r:"八品", d:"县学之师"},
+    {n:"知县", r:"七品", d:"百里侯"},
+    {n:"通判", r:"六品", d:"督粮理刑"},
+    {n:"知州", r:"五品", d:"州之长官"},
+    {n:"知府", r:"四品", d:"一府之尊"},
+    {n:"按察使", r:"三品", d:"省级大法官"},
+    {n:"布政使", r:"二品", d:"省级民政官"},
+    {n:"巡抚", r:"二品", d:"封疆大吏"},
+    {n:"总督", r:"一品", d:"疆臣之首"},
+    {n:"尚书", r:"一品", d:"六部首长"},
+    {n:"大学士", r:"一品", d:"内阁重臣"},
+    {n:"太师", r:"获胜", d:"位极人臣"}
+];
+
+// 补齐121格的螺旋路径，剩余格子填充为“闲职”
+const OFFICES = Array.from({length: 121}, (_, i) => {
+    return RAW_OFFICES[i] || {n:"散官", r:"从属", d:"待命之中"};
+});
+
+const G = {
+    players: [
+        {id: 0, name: "玩家一", pos: 0, color: "#8B1A1A"},
+        {id: 1, name: "玩家二", pos: 0, color: "#1A5276"}
+    ],
+    current: 0,
+    rolling: false,
+    path: []
+};
+
+// 1. 生成螺旋路径逻辑
+function buildSpiralPath() {
+    const matrix = Array(11).fill().map(() => Array(11).fill(0));
+    let x = 0, y = 0, dx = 1, dy = 0;
+    const res = [];
+    for (let i = 0; i < 121; i++) {
+        res.push([x, y]);
+        matrix[y][x] = 1;
+        if (x+dx<0 || x+dx>=11 || y+dy<0 || y+dy>=11 || matrix[y+dy][x+dx]) {
+            [dx, dy] = [-dy, dx];
+        }
+        x += dx; y += dy;
+    }
+    return res;
+}
+
+// 2. 根据官阶获取服装头像
+function getAvatarByPos(pos) {
+    const rank = OFFICES[pos].r;
+    if (pos >= RAW_OFFICES.length - 1) return "🧑‍尊"; // 太师
+    if (rank.includes("一") || rank.includes("二")) return "👲"; // 高官红顶
+    if (rank.includes("三") || rank.includes("四")) return "👨‍⚖️"; // 中级蓝顶
+    if (rank.includes("五") || rank.includes("六")) return "👨‍💼"; // 低级绿袍
+    if (rank.includes("品")) return "💂"; // 衙役/基层
+    return "👦"; // 布衣
+}
+
+// 3. 初始化棋盘
+function initBoard() {
+    G.path = buildSpiralPath();
+    const board = document.getElementById("board");
+    
+    // 创建121个格子
+    const cellElements = [];
+    for(let i=0; i<121; i++) {
+        const div = document.createElement("div");
+        div.className = "cell";
+        const off = OFFICES[i];
+        div.setAttribute("data-rank", off.r);
+        div.innerHTML = `<div class="c-rank">${off.r}</div><div class="c-name">${off.n}</div>`;
+        // 根据螺旋路径计算CSS Grid位置
+        const [x, y] = G.path[i];
+        div.style.gridColumnStart = x + 1;
+        div.style.gridRowStart = y + 1;
+        board.appendChild(div);
+        cellElements.push(div);
+    }
+
+    // 创建棋子
+    const layer = document.getElementById("pieces-layer");
+    G.players.forEach(p => {
+        const pEl = document.createElement("div");
+        pEl.id = `p-${p.id}`;
+        pEl.className = "piece";
+        pEl.innerHTML = `
+            <div class="piece-label" style="border:1px solid ${p.color}">${p.name}</div>
+            <div class="piece-body">👦</div>
+        `;
+        layer.appendChild(pEl);
+        updatePiecePos(p.id);
+    });
+}
+
+function updatePiecePos(pid) {
+    const p = G.players[pid];
+    const [x, y] = G.path[p.pos];
+    const el = document.getElementById(`p-${pid}`);
+    
+    // 棋盘格子的百分比计算
+    const step = 100 / 11;
+    el.style.left = (x * step + step/4) + "%";
+    el.style.top = (y * step + step/4) + "%";
+    
+    // 更新服装
+    el.querySelector(".piece-body").textContent = getAvatarByPos(p.pos);
+}
+
+function addLog(msg) {
+    const log = document.getElementById("log");
+    const div = document.createElement("div");
+    div.textContent = `> ${msg}`;
+    log.prepend(div);
+}
+
+function doRoll() {
+    if (G.rolling) return;
+    G.rolling = true;
+    const btn = document.getElementById("roll-btn");
+    btn.disabled = true;
+
+    let count = 0;
+    const timer = setInterval(() => {
+        const faces = ["⚀","⚁","⚂","⚃","⚄","⚅"];
+        document.getElementById("dice-el").textContent = faces[Math.floor(Math.random()*6)];
+        count++;
+        if (count > 10) {
+            clearInterval(timer);
+            const val = Math.floor(Math.random()*6) + 1;
+            processTurn(val);
+        }
+    }, 60);
+}
+
+function processTurn(val) {
+    const p = G.players[G.current];
+    addLog(`${p.name} 掷出了 ${val} 点`);
+
+    // 简单升降逻辑：1,2,3降/滞，4,5,6升
+    let move = 0;
+    let effect = "";
+    if (val <= 2) { move = -1; effect = "遭遇弹劾，降职！"; }
+    else if (val === 3) { move = 0; effect = "原地踏步，考察中。"; }
+    else { move = val - 3; effect = "表现优异，提拔！"; }
+
+    let newPos = p.pos + move;
+    if (newPos < 0) newPos = 0;
+    if (newPos >= RAW_OFFICES.length - 1) {
+        newPos = RAW_OFFICES.length - 1;
+        addLog(`🎉 ${p.name} 登顶太师，功德圆满！`);
+        alert(`${p.name} 获胜！`);
+    } else {
+        addLog(`${effect} 迁至 ${OFFICES[newPos].n}`);
+    }
+
+    p.pos = newPos;
+    updatePiecePos(p.id);
+
+    // 切换玩家
+    G.current = (G.current + 1) % G.players.length;
+    document.getElementById("status").textContent = `轮到：${G.players[G.current].name}`;
+    G.rolling = false;
+    document.getElementById("roll-btn").disabled = false;
+}
+
+window.onload = () => {
+    initBoard();
+    document.getElementById("status").textContent = `轮到：${G.players[G.current].name}`;
+};
+</script>
+
+</body>
+</html>
