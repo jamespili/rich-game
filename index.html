@@ -4,323 +4,264 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  overscroll-behavior: none;
-  background: #c8a96e;
-}
+* { box-sizing: border-box; margin:0; padding:0; }
+html, body { width:100%; height:100%; overflow:hidden; background:#c8a96e; }
 body {
   font-family: "STKaiti", "KaiTi", "华文楷体", "楷体", serif;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
+  display:flex; align-items:center; justify-content:center;
 }
+#app { width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
 
-#app {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* ================================== */
-/* 强制横屏布局 · 永远不变形 · 全显示 */
-/* ================================== */
+/* 响应式主容器 ———— 横竖屏自动适配 */
 .layout {
-  display: flex;
-  width: 100vmin;
-  height: 100vh;
-  max-width: 1200px;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 8px;
-  transform-origin: center center;
+  display:flex;
+  width:100%;
+  height:100%;
+  max-width:1100px;
+  padding:8px;
+  gap:8px;
+  align-items:center;
+  justify-content:center;
 }
 
-/* 棋盘：1:1 绝对正方形 · 绝不变形 */
+/* 棋盘：永远1:1正方形，绝不变形 */
 .board-area {
-  flex: 0 0 auto;
-  height: calc(100vh - 16px);
-  aspect-ratio: 1 / 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  flex:0 1 auto;
+  width:100%;
+  max-width:calc(100vh - 100px);
+  aspect-ratio:1/1;
 }
 
-/* 右侧面板：固定宽度 · 不挤压 */
+/* 控制面板：自动适配剩余宽度 */
 .control-panel {
-  flex: 0 0 190px;
-  height: calc(100vh - 16px);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  overflow-y: auto;
-  padding-right: 2px;
+  flex:1;
+  min-width:170px;
+  max-width:220px;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  overflow-y:auto;
+  padding-right:2px;
 }
-.control-panel::-webkit-scrollbar { width: 2px; }
-.control-panel::-webkit-scrollbar-thumb { background: #8B1A1A66; }
+.control-panel::-webkit-scrollbar { width:2px; }
+.control-panel::-webkit-scrollbar-thumb { background:#8B1A1A66; }
 
 .outer-wrapper {
-  background: #e8d5a0;
-  border: 3px solid #8B1A1A;
-  border-radius: 4px;
-  width: 100%;
-  height: 100%;
-  padding: 4px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.2);
+  background:#e8d5a0;
+  border:3px solid #8B1A1A;
+  border-radius:4px;
+  width:100%;
+  height:100%;
+  padding:4px;
 }
 .top-strip {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 2px 4px 4px;
+  display:flex; justify-content:space-between; align-items:center;
+  padding:2px 4px 4px;
 }
 .top-title {
-  font-size: 20px;
-  color: #8B1A1A;
-  font-weight: bold;
-  letter-spacing: 8px;
-  text-align: center;
-  flex: 1;
+  font-size:max(16px, 2.5vh);
+  color:#8B1A1A; font-weight:bold; letter-spacing:6px; text-align:center; flex:1;
 }
 .corner-text {
-  font-size: 11px;
-  color: #8B1A1A;
-  writing-mode: vertical-rl;
-  line-height: 1.2;
+  font-size:max(10px, 1.2vh);
+  color:#8B1A1A; writing-mode:vertical-rl; line-height:1.2;
 }
 .board-frame {
-  border: 2px solid #8B1A1A;
-  background: #f5e8c8;
-  width: 100%;
-  height: calc(100% - 36px);
-  border-radius: 2px;
+  border:2px solid #8B1A1A;
+  background:#f5e8c8;
+  width:100%;
+  height:calc(100% - 30px);
 }
 .board-grid {
-  display: grid;
-  grid-template-columns: repeat(11, 1fr);
-  grid-template-rows: repeat(11, 1fr);
-  width: 100%;
-  height: 100%;
+  display:grid;
+  grid-template-columns:repeat(11,1fr);
+  grid-template-rows:repeat(11,1fr);
+  width:100%; height:100%;
 }
 .cell {
-  border: 0.5px solid #8B1A1A88;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 1px;
-  position: relative;
-  min-height: 0;
-  overflow: hidden;
+  border:0.5px solid #8B1A1A88;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:1px;
 }
 .cell-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  gap: 0px;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  width:100%; height:100%;
+  gap:0px;
 }
-.c-rank { font-size: 8px; color: #8B1A1A; line-height: 1.1; text-align: center; }
-.c-name { font-size: 10px; color: #3d0a00; font-weight: bold; line-height: 1.15; text-align: center; }
+.c-rank { font-size:max(7px, 1vh); color:#8B1A1A; line-height:1.1; text-align:center; }
+.c-name { font-size:max(8px, 1.3vh); color:#3d0a00; font-weight:bold; line-height:1.15; text-align:center; }
 
 .center-block {
-  grid-column: 5 / 8;
-  grid-row: 5 / 8;
-  border: 2px solid #8B1A1A;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: #fff8ee;
-  z-index: 2;
-  padding: 2px;
+  grid-column:5/8; grid-row:5/8;
+  border:2px solid #8B1A1A;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  background:#fff8ee;
+  padding:2px;
 }
 .san-gong {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border: 1px solid #8B1A1A;
-  padding: 1px 2px;
-  background: rgba(255,248,238,0.85);
-  border-radius: 2px;
+  border:1px solid #8B1A1A;
+  padding:1px 2px;
+  background:rgba(255,248,238,0.85);
+  border-radius:2px;
+  text-align:center;
 }
-.san-gong .sg-name { font-size: 11px; font-weight: bold; color: #8B1A1A; }
-.san-gong .sg-rank { font-size: 8px; color: #5A1A00; }
+.san-gong .sg-name { font-size:max(9px,1.2vh); font-weight:bold; color:#8B1A1A; }
+.san-gong .sg-rank { font-size:max(7px,1vh); color:#5A1A00; }
 
 .token {
-  width: 12px; height: 12px;
-  border-radius: 50%;
-  border: 1px solid #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 6px;
-  margin: 0 1px;
-  flex-shrink: 0;
+  width:max(11px,1.8vh); height:max(11px,1.8vh);
+  border-radius:50%; border:1px solid #fff;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:max(6px,1vh);
 }
 .tokens-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1px;
-  margin-top: 1px;
+  display:flex; flex-wrap:wrap; justify-content:center;
+  gap:1px; margin-top:1px;
 }
 
 .panel-box {
-  background: #f5e8c8;
-  border: 1px solid #8B1A1A;
-  padding: 8px;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  flex-shrink: 0;
+  background:#f5e8c8;
+  border:1px solid #8B1A1A;
+  padding:8px;
+  border-radius:4px;
+  flex-shrink:0;
 }
 .panel-box h3 {
-  font-size: 13px;
-  color: #8B1A1A;
-  border-bottom: 1px solid #C8963C88;
-  padding-bottom: 4px;
-  margin-bottom: 6px;
-  text-align: center;
+  font-size:max(12px,1.8vh);
+  color:#8B1A1A;
+  border-bottom:1px solid #C8963C88;
+  padding-bottom:4px; margin-bottom:6px;
+  text-align:center;
 }
 .player-row {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 4px;
-  border-radius: 3px;
-  margin-bottom: 4px;
-  border: 0.5px solid transparent;
-  font-size: 11px;
+  display:flex; align-items:center; gap:5px;
+  padding:3px 4px;
+  border-radius:3px;
+  margin-bottom:4px;
+  font-size:max(10px,1.5vh);
 }
-.player-row.active { border-color: #C8963C; background: #fff3e0; }
-.player-dot { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; display:flex; align-items:center; justify-content:center; font-size:10px; color:#fff; }
-.p-name { font-weight: bold; color: #3d0a00; font-size: 11px; }
-.p-pos  { color: #7A4020; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.player-row.active { border-color:#C8963C; background:#fff3e0; }
+.player-dot {
+  width:max(16px,2.2vh); height:max(16px,2.2vh);
+  border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-size:max(10px,1.5vh);
+}
+.p-name { font-weight:bold; color:#3d0a00; font-size:max(11px,1.6vh); }
+.p-pos { color:#7A4020; font-size:max(10px,1.4vh); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
 .big-dice {
-  font-size: 50px;
-  text-align: center;
-  cursor: pointer;
-  line-height: 1;
-  margin: 4px 0;
-  user-select: none;
+  font-size:max(44px,6vh);
+  text-align:center;
+  line-height:1;
+  margin:4px 0;
+  user-select:none;
 }
-.big-dice:active { transform: scale(0.88); }
 .roll-btn {
-  width: 100%;
-  background: #8B1A1A;
-  color: #f5e8c8;
-  border: none;
-  padding: 6px 0;
-  font-size: 13px;
-  cursor: pointer;
-  border-radius: 4px;
+  width:100%;
+  background:#8B1A1A; color:#f5e8c8;
+  border:none; padding:6px 0;
+  font-size:max(12px,2vh);
+  border-radius:4px;
 }
-.roll-btn:hover { background: #6B0A0A; }
-.roll-btn:disabled { background: #aaa; cursor: not-allowed; }
+.roll-btn:hover { background:#6B0A0A; }
+.roll-btn:disabled { background:#aaa; }
 
 .event-display {
-  background: #fff8ee;
-  border: 0.5px solid #C8963C;
-  padding: 6px;
-  font-size: 11px;
-  color: #3d0a00;
-  min-height: 50px;
-  line-height: 1.5;
-  border-radius: 3px;
+  background:#fff8ee;
+  border:0.5px solid #C8963C;
+  padding:6px;
+  font-size:max(10px,1.5vh);
+  color:#3d0a00;
+  min-height:50px;
+  line-height:1.5;
+  border-radius:3px;
 }
 .ev-tag {
-  display: inline-block;
-  font-size: 10px;
-  padding: 0 4px;
-  border-radius: 2px;
-  margin-bottom: 3px;
-  font-weight: bold;
+  font-size:max(9px,1.3vh);
+  padding:0 4px;
+  border-radius:2px;
+  font-weight:bold;
 }
-.ev-up   { background: #d4edda; color: #155724; }
-.ev-down { background: #f8d7da; color: #721c24; }
-.ev-stay { background: #d1ecf1; color: #0c5460; }
+.ev-up { background:#d4edda; color:#155724; }
+.ev-down { background:#f8d7da; color:#721c24; }
+.ev-stay { background:#d1ecf1; color:#0c5460; }
 
 .log-scroll {
-  max-height: 100px;
-  overflow-y: auto;
-  font-size: 10px;
-  color: #5A3020;
-  line-height: 1.5;
+  max-height:100px;
+  overflow-y:auto;
+  font-size:max(10px,1.4vh);
+  color:#5A3020;
+  line-height:1.5;
 }
-.log-line { border-bottom: 0.5px solid #C8963C44; padding: 1px 0; }
+.log-line { border-bottom:0.5px solid #C8963C44; padding:1px 0; }
 
 .overlay {
-  position: fixed; inset: 0;
-  background: #00000088;
-  display: flex; align-items: center; justify-content: center;
-  z-index: 100;
+  position:fixed; inset:0;
+  background:#00000088;
+  display:flex; align-items:center; justify-content:center;
+  z-index:100;
 }
 .modal {
-  background: #f5e8c8;
-  border: 3px solid #8B1A1A;
-  padding: 20px;
-  max-width: 400px;
-  width: 90%;
-  border-radius: 6px;
+  background:#f5e8c8;
+  border:3px solid #8B1A1A;
+  padding:20px;
+  max-width:400px; width:90%;
+  border-radius:6px;
 }
-.modal h2 { text-align: center; color: #8B1A1A; font-size: 20px; margin-bottom: 12px; }
+.modal h2 { text-align:center; color:#8B1A1A; font-size:max(20px,3.5vh); }
 .modal-intro {
-  font-size: 12px; color: #5A1A00; line-height: 1.6;
-  background: #fffbee; border-left: 3px solid #C8963C;
-  padding: 8px 10px; margin-bottom: 12px;
+  font-size:max(12px,2vh); color:#5A1A00; line-height:1.6;
+  background:#fffbee; border-left:3px solid #C8963C;
+  padding:8px 10px; margin-bottom:12px;
 }
-.form-label { font-size: 12px; color: #5A1A00; margin-bottom: 5px; }
-.form-select {
-  width: 100%; padding: 6px; font-size: 13px;
-  border: 1px solid #8B1A1A; background: #fff8ee;
-  margin-bottom: 10px; border-radius: 4px;
-}
-.pname-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
-.pname-dot { width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; }
 .pname-input {
-  flex: 1; padding: 5 8px;
-  border: 1px solid #C8963C; background: #fff8ee;
-  border-radius: 4px;
+  flex:1; padding:5px 8px;
+  border:1px solid #C8963C; background:#fff8ee;
+  border-radius:4px;
+  font-size:max(12px,2vh);
 }
 .start-btn {
-  width: 100%; padding: 10px; background: #8B1A1A; color: #f5e8c8;
-  border: none; font-size: 15px; cursor: pointer;
-  border-radius: 4px; margin-top: 6px;
+  width:100%; padding:10px;
+  background:#8B1A1A; color:#f5e8c8;
+  border:none; font-size:max(15px,2.5vh);
+  border-radius:4px; margin-top:6px;
 }
-.win-modal { text-align: center; }
-.win-icon { font-size: 56px; margin: 8px 0; }
-.win-name { font-size: 22px; color: #8B1A1A; font-weight: bold; }
-.win-sub  { font-size: 13px; color: #5A1A00; margin-bottom: 14px; }
+.win-modal { text-align:center; }
+.win-icon { font-size:max(56px,8vh); }
+.win-name { font-size:max(22px,4vh); color:#8B1A1A; font-weight:bold; }
 .restart-btn {
-  padding: 8px 28px; background: #8B1A1A; color: #f5e8c8;
-  border: none; font-size: 14px; cursor: pointer;
-  border-radius: 4px;
+  padding:8px 28px;
+  background:#8B1A1A; color:#f5e8c8;
+  border:none; font-size:max(14px,2.2vh);
+  border-radius:4px;
 }
 
-/* 禁用所有自动变形、自动适配 */
-@media (max-width: 2000px) {
-  .layout, .board-area, .control-panel {
-    transform: none !important;
-    max-height: none !important;
-    min-height: auto !important;
+/* 手机竖屏：自动上下布局 */
+@media (max-width:550px) {
+  .layout {
+    flex-direction:column;
+    padding:6px;
+    gap:6px;
+  }
+  .board-area {
+    max-width:calc(100vw - 20px);
+    max-height:60vh;
+  }
+  .control-panel {
+    width:100%;
+    max-width:100%;
+    max-height:40vh;
   }
 }
 </style>
 </head>
 <body>
-
 <div id="app"></div>
-
 <script>
 // ============================
 //  DATA: Spiral path (64 cells)
@@ -406,9 +347,7 @@ for (let r = 4; r <= 6; r++)
     centerCells.add(`${r},${c}`);
 const outerPath = spiralPath.filter(([r,c]) => !centerCells.has(`${r},${c}`));
 const OFFICES = RAW_OFFICES.map((o, i) => ({
-  ...o,
-  id: i,
-  gridPos: outerPath[i] || [5, 5],
+  ...o, id: i, gridPos: outerPath[i] || [5,5],
 }));
 
 // ============================
@@ -487,13 +426,13 @@ function showSetup() {
       源于唐代，盛行明清。玩家轮流掷骰，骰面决定<b>德·才·功·赃</b>四类命运。
       前三者升官，"赃"则降职。首位从白丁晋升至<b style="color:#8B1A1A">太师</b>者获胜。
     </div>
-    <label class="form-label">玩家人数</label>
+    <label style="font-size:max(12px,2vh); margin-bottom:5px; display:block">玩家人数</label>
     <select class="form-select" id="num-sel" onchange="refreshNames()">
       <option value="2">二人对弈</option>
       <option value="3" selected>三人共弈</option>
       <option value="4">四人同台</option>
     </select>
-    <label class="form-label">玩家名号</label>
+    <label style="font-size:max(12px,2vh); margin-bottom:5px; display:block">玩家名号</label>
     <div id="name-rows"></div>
     <button class="start-btn" onclick="startGame()">🏯 入朝为官</button>
   </div>
@@ -503,8 +442,8 @@ function showSetup() {
 function refreshNames() {
   const n = parseInt(document.getElementById("num-sel").value);
   document.getElementById("name-rows").innerHTML = Array.from({length:n},(_,i)=>`
-    <div class="pname-row">
-      <div class="pname-dot" style="background:${PLAYER_COLORS[i]}"></div>
+    <div class="pname-row" style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+      <div class="pname-dot" style="width:20px; height:20px; border-radius:50%; background:${PLAYER_COLORS[i]}"></div>
       <input class="pname-input" id="pn-${i}" value="${DEFAULT_NAMES[i]}" placeholder="${DEFAULT_NAMES[i]}">
     </div>`).join("");
 }
@@ -516,11 +455,7 @@ function startGame() {
       id:i, name: document.getElementById(`pn-${i}`)?.value||DEFAULT_NAMES[i],
       pos:0, color:PLAYER_COLORS[i], char:PLAYER_CHARS[i]
     })),
-    current: 0,
-    dice: 1,
-    lastEvent: null,
-    log: ["游戏开始！各位大人从白丁起步。"],
-    rolling: false,
+    current: 0, dice:1, lastEvent:null, log:["游戏开始！各位大人从白丁起步。"], rolling:false,
   };
   render();
 }
@@ -532,7 +467,7 @@ function showWin() {
   <div class="modal win-modal">
     <div class="win-icon">🏆</div>
     <div class="win-name">${w.char} · ${w.name}</div>
-    <div class="win-sub">荣登<b style="color:#8B1A1A">太师</b>之位，位极人臣！<br>恭祝阁下辅弼君王，千秋万代！</div>
+    <div class="win-sub" style="font-size:max(13px,2.2vh); color:#5A1A00; margin-bottom:14px;">荣登<b style="color:#8B1A1A">太师</b>之位，位极人臣！<br>恭祝阁下辅弼君王，千秋万代！</div>
     <button class="restart-btn" onclick="restartGame()">重 开 一 局</button>
   </div>
 </div>`;
@@ -540,7 +475,7 @@ function showWin() {
 function restartGame() { G = { screen:"setup" }; render(); }
 
 function renderBoardStatic() {
-  return `<div style="opacity:0.4;pointer-events:none;filter:blur(1px)">${buildBoardHTML([], -1)}</div>`;
+  return `<div style="opacity:0.4;pointer-events:none">${buildBoardHTML([], -1)}</div>`;
 }
 function renderBoardOnly() {
   return buildBoardHTML(G.players, G.current);
@@ -549,7 +484,7 @@ function renderBoardOnly() {
 function renderGame() {
   const { players, current, dice, lastEvent, log } = G;
   const cp = players[current];
-  let evHtml = `<div class="event-display" style="color:#7A5030;font-style:italic">等待掷骰…</div>`;
+  let evHtml = `<div class="event-display" style="font-style:italic">等待掷骰…</div>`;
   if (lastEvent) {
     const tc = lastEvent.type==="up"?"ev-up":lastEvent.type==="down"?"ev-down":"ev-stay";
     const tt = lastEvent.type==="up"?"▲升":lastEvent.type==="down"?"▼降":"◆留";
@@ -572,91 +507,58 @@ function renderGame() {
   const logHtml = log.slice(0,12).map(l=>`<div class="log-line">${l}</div>`).join("");
   return `
 <div class="layout">
-  <div class="board-area">
-    ${buildBoardHTML(players, current)}
-  </div>
+  <div class="board-area">${buildBoardHTML(players, current)}</div>
   <div class="control-panel">
-    <div class="panel-box">
-      <h3>⛩ 各位大人</h3>
-      ${playerRows}
-    </div>
+    <div class="panel-box"><h3>⛩ 各位大人</h3>${playerRows}</div>
     <div class="panel-box">
       <h3>🎲 掷 骰</h3>
-      <span class="big-dice" id="dice-el" onclick="doRoll()">${DICE_FACES[dice-1]}</span>
-      <button class="roll-btn" id="roll-btn" onclick="doRoll()">${cp.char}·${cp.name} 掷骰</button>
+      <span class="big-dice" onclick="doRoll()">${DICE_FACES[dice-1]}</span>
+      <button class="roll-btn" onclick="doRoll()">${cp.char}·${cp.name} 掷骰</button>
     </div>
-    <div class="panel-box">
-      <h3>📜 朝廷命令</h3>
-      ${evHtml}
-    </div>
-    <div class="panel-box">
-      <h3>📋 仕途档案</h3>
-      <div class="log-scroll">${logHtml}</div>
-    </div>
+    <div class="panel-box"><h3>📜 朝廷命令</h3>${evHtml}</div>
+    <div class="panel-box"><h3>📋 仕途档案</h3><div class="log-scroll">${logHtml}</div></div>
   </div>
 </div>`;
 }
 
 function buildBoardHTML(players, currentIdx) {
   const posMap = {};
-  OFFICES.forEach((o, i) => {
-    const key = `${o.gridPos[0]},${o.gridPos[1]}`;
-    posMap[key] = i;
-  });
-  const cells = Array.from({length: GRID_SIZE}, (_, r) =>
-    Array.from({length: GRID_SIZE}, (_, c) => {
-      const key = `${r},${c}`;
-      const idx = posMap[key];
-      return { r, c, idx };
-    })
-  );
-  let rows = "";
-  for (let r = 0; r < GRID_SIZE; r++) {
-    for (let c = 0; c < GRID_SIZE; c++) {
-      if (r===4 && c===4) {
-        const playersInFinish = players.filter(p => {
-          const o = OFFICES[p.pos];
-          return o && (o.special==="finish"||o.special==="finish-zone");
-        });
-        const tokHtml = playersInFinish.map(p=>
-          `<span class="token" style="background:${p.color}">${p.char}</span>`).join("");
-        rows += `<div class="center-block" style="grid-column:5/8;grid-row:5/8;">
-          <div class="big-title">三　公</div>
-          <div style="font-size:8px;color:#5A1A00;margin-bottom:4px;text-align:center">位极人臣·功德圆满</div>
-          <div class="center-row">
-            <div class="san-gong"><div class="sg-name">太保</div><div class="sg-rank">从一品</div></div>
-            <div class="san-gong" style="border-color:#C8963C;background:#fff3e0"><div class="sg-name">太傅</div><div class="sg-rank">从一品</div></div>
-            <div class="san-gong" style="border-color:#8B1A1A;background:#f8e8d0"><div class="sg-name">太师</div><div class="sg-rank">正一品</div></div>
-          </div>
-          ${tokHtml?`<div class="tokens-row" style="margin-top:4px">${tokHtml}</div>`:""}
-        </div>`;
+  OFFICES.forEach((o,i)=>{ const k=`${o.gridPos[0]},${o.gridPos[1]}`; posMap[k]=i; });
+  let rows="";
+  for(let r=0;r<GRID_SIZE;r++){
+    for(let c=0;c<GRID_SIZE;c++){
+      if(r===4&&c===4){
+        const fs=players.filter(p=>{const o=OFFICES[p.pos];return o&&(o.special==="finish"||o.special==="finish-zone");});
+        const tok=fs.map(p=>`<span class="token" style="background:${p.color}">${p.char}</span>`).join("");
+        rows+=`<div class="center-block" style="grid-column:5/8;grid-row:5/8;">
+        <div style="font-size:max(14px,2vh); font-weight:bold; margin-bottom:4px">三　公</div>
+        <div style="font-size:max(8px,1.1vh); color:#5A1A00; margin-bottom:4px">位极人臣·功德圆满</div>
+        <div style="display:flex; gap:4px;">
+          <div class="san-gong"><div class="sg-name">太保</div><div class="sg-rank">从一品</div></div>
+          <div class="san-gong" style="border-color:#C8963C;background:#fff3e0"><div class="sg-name">太傅</div><div class="sg-rank">从一品</div></div>
+          <div class="san-gong" style="border-color:#8B1A1A;background:#f8e8d0"><div class="sg-name">太师</div><div class="sg-rank">正一品</div></div>
+        </div>${tok?`<div class="tokens-row">${tok}</div>`:""}</div>`;
         continue;
       }
-      if ((r>=4&&r<=6)&&(c>=4&&c<=6)) continue;
-      const { idx } = cells[r][c];
-      if (idx === undefined || idx === null || idx < 0) {
-        rows += `<div class="cell" style="background:#f5e8c888;grid-column:${c+1};grid-row:${r+1}"></div>`;
-        continue;
-      }
-      const off = OFFICES[idx];
-      if (!off) { rows += `<div class="cell" style="grid-column:${c+1};grid-row:${r+1}"></div>`; continue; }
-      const here = players.filter(p => p.pos === idx);
-      const tokHtml = here.map(p=>
-        `<span class="token" style="background:${p.color}">${p.char}</span>`).join("");
-      const tierBgs = ["#e8f0d8","#f5e8c8","#eee0b8","#e8d8b0","#e0c890","#f8d8c0","#f8c8a8","#f5e0d0"];
-      let bg = `background:${tierBgs[Math.min(off.tier,7)]}`;
-      let extraStyle = "";
-      if (off.special==="start") extraStyle = "border:1.5px solid #5A8A3A !important;background:#d8ecc8 !important;";
-      if (off.special==="bonus") extraStyle = "border:1.5px solid #C8963C !important;background:#fff3cc !important;";
-      const nameLines = off.name.split('\n');
-      rows += `
-        <div class="cell" style="${bg};${extraStyle};grid-column:${c+1};grid-row:${r+1}">
-          <div class="cell-inner">
-            <div class="c-rank">${off.rank}</div>
-            ${nameLines.map(l=>`<div class="c-name">${l}</div>`).join("")}
-            ${here.length?`<div class="tokens-row">${tokHtml}</div>`:""}
-          </div>
-        </div>`;
+      if((r>=4&&r<=6)&&(c>=4&&c<=6)) continue;
+      const idx=posMap[`${r},${c}`];
+      if(idx==null){rows+=`<div class="cell" style="background:#f5e8c888;grid-column:${c+1};grid-row:${r+1}"></div>`;continue;}
+      const off=OFFICES[idx];
+      const here=players.filter(p=>p.pos===idx);
+      const tok=here.map(p=>`<span class="token" style="background:${p.color}">${p.char}</span>`).join("");
+      const tb=["#e8f0d8","#f5e8c8","#eee0b8","#e8d8b0","#e0c890","#f8d8c0","#f8c8a8","#f5e0d0"];
+      let bg=`background:${tb[Math.min(off.tier,7)]}`;
+      let ex="";
+      if(off.special==="start") ex="border:1.5px solid #5A8A3A; background:#d8ecc8;";
+      if(off.special==="bonus") ex="border:1.5px solid #C8963C; background:#fff3cc;";
+      const nl=off.name.split('\n');
+      rows+=`<div class="cell" style="${bg};${ex};grid-column:${c+1};grid-row:${r+1}">
+        <div class="cell-inner">
+          <div class="c-rank">${off.rank}</div>
+          ${nl.map(l=>`<div class="c-name">${l}</div>`).join("")}
+          ${here.length?`<div class="tokens-row">${tok}</div>`:""}
+        </div>
+      </div>`;
     }
   }
   return `
@@ -666,52 +568,33 @@ function buildBoardHTML(players, currentIdx) {
     <div class="top-title">升 官 圖</div>
     <div class="corner-text">状元</div>
   </div>
-  <div class="board-frame">
-    <div class="board-grid">${rows}</div>
-  </div>
+  <div class="board-frame"><div class="board-grid">${rows}</div></div>
 </div>`;
 }
 
 function doRoll() {
-  if (G.rolling) return;
-  G.rolling = true;
-  const btn = document.getElementById("roll-btn");
-  if (btn) btn.disabled = true;
-  let cnt = 0;
-  const iv = setInterval(() => {
-    const f = Math.floor(Math.random()*6);
-    const el = document.getElementById("dice-el");
-    if (el) el.textContent = DICE_FACES[f];
+  if(G.rolling)return; G.rolling=true;
+  let cnt=0;
+  const iv=setInterval(()=>{
+    const f=Math.floor(Math.random()*6);
     cnt++;
-    if (cnt >= 10) {
-      clearInterval(iv);
-      const final = Math.floor(Math.random()*6)+1;
-      processRoll(final);
-    }
-  }, 70);
+    if(cnt>=10){clearInterval(iv); processRoll(Math.floor(Math.random()*6)+1);}
+  },70);
 }
 function processRoll(dv) {
-  const p = G.players[G.current];
-  const cat = getCategory(dv);
-  const ev = pickEvent(cat);
-  let np = p.pos + ev.steps;
-  if (np < 0) np = 0;
-  const maxPos = OFFICES.length - 1;
-  if (np > maxPos) np = maxPos;
-  p.pos = np;
-  G.dice = dv;
-  G.lastEvent = ev;
-  const off = OFFICES[np];
+  const p=G.players[G.current];
+  const ev=pickEvent(getCategory(dv));
+  let np=p.pos+ev.steps;
+  if(np<0)np=0;
+  const max=OFFICES.length-1;
+  if(np>max)np=max;
+  p.pos=np;
+  G.dice=dv; G.lastEvent=ev;
+  const off=OFFICES[np];
   G.log.unshift(`${p.char}·${p.name}：${ev.text} → ${off.name.replace('\n','·')}(${off.rank})`);
-  if (off.special === "finish") {
-    G.winner = p;
-    G.screen = "win";
-    G.rolling = false;
-    render();
-    return;
-  }
-  G.current = (G.current+1) % G.players.length;
-  G.rolling = false;
+  if(off.special==="finish"){G.winner=p; G.screen="win"; G.rolling=false; render(); return;}
+  G.current=(G.current+1)%G.players.length;
+  G.rolling=false;
   render();
 }
 
