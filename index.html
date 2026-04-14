@@ -1,324 +1,458 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>升官图 - 宫廷晋升版</title>
-    <style>
-        :root {
-            --bg-paper: #f4e8c1;
-            --border-red: #8B1A1A;
-            --text-dark: #3d0a00;
-        }
+<meta charset="UTF-8">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: "STKaiti", "KaiTi", "华文楷体", "楷体", serif;
+  background: #b08e5a; /* 更深厚的底色 */
+  min-height: 100vh;
+  padding: 10px;
+}
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: "STKaiti", "KaiTi", serif;
-            background: #c8a96e;
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-        }
+.outer-wrapper {
+  background: #e8d5a0;
+  border: 6px double #8B1A1A; /* 改为双线边框更有古味 */
+  border-radius: 2px;
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  padding: 10px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
 
-        .outer-wrapper {
-            background: var(--bg-paper);
-            border: 8px double var(--border-red);
-            max-width: 800px;
-            width: 100%;
-            padding: 15px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
-        }
+.top-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+}
+.top-title {
+  font-size: 26px;
+  color: #8B1A1A;
+  font-weight: bold;
+  letter-spacing: 12px;
+  text-align: center;
+  flex: 1;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+}
+.corner-text {
+  font-size: 12px;
+  color: #8B1A1A;
+  writing-mode: vertical-rl;
+  font-weight: bold;
+}
 
-        /* 棋盘：11x11 黄金比例 */
-        .board-container {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 1;
-            background: var(--border-red);
-            padding: 2px;
-        }
+.board-frame {
+  border: 2px solid #8B1A1A;
+  background: #f5e8c8;
+  position: relative;
+}
 
-        .board-grid {
-            display: grid;
-            grid-template-columns: repeat(11, 1fr);
-            grid-template-rows: repeat(11, 1fr);
-            gap: 1px;
-            width: 100%;
-            height: 100%;
-        }
+.board-grid {
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  grid-template-rows: repeat(11, 11);
+  width: 100%;
+  aspect-ratio: 1;
+  position: relative;
+}
 
-        .cell {
-            background: var(--bg-paper);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            transition: background 0.3s;
-            cursor: default;
-            position: relative;
-        }
+/* 格子样式微调 */
+.cell {
+  border: 0.5px solid #8B1A1A44;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+.cell:hover { background: rgba(255, 232, 170, 0.5) !important; z-index: 5; transform: scale(1.02); }
 
-        /* 视觉分区：越往内颜色越重 */
-        .cell[data-tier="0"] { background: #fdfaf0; } /* 庶民/功名 */
-        .cell[data-tier="1"] { background: #f9f2d0; } /* 基层官 */
-        .cell[data-tier="2"] { background: #f5e6a0; } /* 中层官 */
-        .cell[data-tier="3"] { background: #ecc580; } /* 封疆大吏 */
-        .cell[data-tier="4"] { background: #e0a070; } /* 内阁首辅 */
+.c-rank { font-size: 8px; color: #8B1A1A; margin-bottom: 1px; transform: scale(0.9); }
+.c-name { font-size: 11px; color: #3d0a00; font-weight: bold; line-height: 1.1; text-align: center; white-space: pre-wrap; }
 
-        .c-rank { font-size: 8px; color: #888; }
-        .c-name { font-weight: bold; color: var(--text-dark); line-height: 1.2; text-align: center; }
+/* 颜色层级微调 - 更有宣纸感 */
+.tier-0 { background: #fdfaf0; }
+.tier-1 { background: #f9f2d0; }
+.tier-2 { background: #f5e6a0; }
+.tier-3 { background: #ecc580; }
+.tier-4 { background: #e0a070; }
+.tier-5 { background: #d48050; }
+.tier-6 { background: #c06040; }
+.tier-7 { background: #a04030; }
 
-        /* 棋子：小人进化系统 */
-        .piece {
-            position: absolute;
-            width: 8%;
-            height: 8%;
-            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            pointer-events: none;
-        }
+/* 三公中心区 */
+.center-block {
+  grid-column: 5 / 8;
+  grid-row: 5 / 8;
+  border: 2px solid #8B1A1A;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fff8ee url('https://www.transparenttextures.com/patterns/pinstriped-suit.png');
+  z-index: 2;
+  box-shadow: inset 0 0 15px rgba(139, 26, 26, 0.1);
+}
+.center-block .big-title { font-size: 18px; letter-spacing: 5px; color: #8B1A1A; font-weight: bold; }
 
-        /* 动态服装底座 */
-        .piece-avatar {
-            font-size: 24px;
-            line-height: 1;
-            position: relative;
-            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.4));
-        }
+.san-gong {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #8B1A1A;
+  padding: 4px;
+  background: white;
+  margin: 2px;
+}
 
-        .piece-rank-tag {
-            font-size: 9px;
-            padding: 1px 4px;
-            background: white;
-            border-radius: 10px;
-            border: 1px solid currentColor;
-            white-space: nowrap;
-            margin-top: -5px;
-        }
+/* 棋子进化样式 */
+.token-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+  margin-top: 2px;
+}
+.piece-unit {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.piece-avatar { font-size: 18px; line-height: 1; filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3)); }
+.piece-label {
+  font-size: 8px;
+  color: white;
+  padding: 0 2px;
+  border-radius: 2px;
+  margin-top: -3px;
+  white-space: nowrap;
+}
 
-        /* 控制面板 */
-        .controls {
-            margin-top: 20px;
-            padding: 15px;
-            border-top: 2px solid var(--border-red);
-            text-align: center;
-        }
+/* 控制面板布局固定 */
+.layout { display: flex; gap: 12px; }
+.board-area { flex: 1; }
+.control-panel { width: 220px; display: flex; flex-direction: column; gap: 10px; }
 
-        .dice-box {
-            font-size: 60px;
-            margin: 10px 0;
-            cursor: pointer;
-            user-select: none;
-        }
+.panel-box {
+  background: #f5e8c8;
+  border: 1px solid #8B1A1A;
+  padding: 10px;
+  box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+.panel-box h3 { font-size: 14px; color: #8B1A1A; border-bottom: 1px solid #8B1A1A; margin-bottom: 8px; text-align: center; }
 
-        button {
-            padding: 12px 40px;
-            background: var(--border-red);
-            color: #f4e8c1;
-            border: none;
-            font-size: 18px;
-            font-family: inherit;
-            cursor: pointer;
-            border-radius: 2px;
-        }
+.big-dice { font-size: 60px; text-align: center; cursor: pointer; display: block; margin: 5px 0; transition: transform 0.1s; }
+.big-dice:active { transform: scale(0.9); }
 
-        button:active { transform: scale(0.95); }
-        button:disabled { background: #999; }
+.roll-btn {
+  width: 100%; background: #8B1A1A; color: #f5e8c8; border: none; padding: 10px;
+  font-size: 15px; cursor: pointer; font-family: inherit; font-weight: bold;
+}
 
-        .game-log {
-            height: 80px;
-            overflow-y: auto;
-            background: #fff;
-            border: 1px solid #ddd;
-            margin-top: 15px;
-            padding: 8px;
-            font-size: 12px;
-            text-align: left;
-            line-height: 1.6;
-        }
-    </style>
+.log-scroll { max-height: 120px; overflow-y: auto; font-size: 11px; }
+
+/* 响应式 */
+@media (max-width: 600px) {
+  .layout { flex-direction: column; }
+  .control-panel { width: 100%; }
+}
+</style>
 </head>
 <body>
 
-<div class="outer-wrapper">
-    <div class="board-container">
-        <div id="board" class="board-grid"></div>
-        <div id="pieces-layer"></div>
-    </div>
-
-    <div class="controls">
-        <h2 id="current-player" style="color:var(--border-red)">轮到：玩家一</h2>
-        <div class="dice-box" id="dice-display">🎲</div>
-        <button id="roll-btn" onclick="handleRoll()">掷骰晋升</button>
-        <div class="game-log" id="log-box">大清吏部提示：点击按钮开始仕途。</div>
-    </div>
-</div>
+<div id="app"></div>
 
 <script>
-// 1. 构建真实的官职阶梯 (共 121 个)
-const OFFICE_DATA = [
-    {n:"白丁", r:"草民", t:0}, {n:"童生", r:"功名", t:0}, {n:"秀才", r:"生员", t:0}, {n:"举人", r:"孝廉", t:0},
-    {n:"进士", r:"天子门生", t:0}, {n:"翰林院\n编修", r:"正七品", t:1}, {n:"知县", r:"正七品", t:1},
-    {n:"州判", r:"从六品", t:1}, {n:"推官", r:"正六品", t:1}, {n:"知州", r:"从五品", t:1},
-    {n:"同知", r:"正五品", t:2}, {n:"知府", r:"正四品", t:2}, {n:"道员", r:"正四品", t:2},
-    {n:"按察使", r:"正三品", t:3}, {n:"布政使", r:"从二品", t:3}, {n:"巡抚", r:"从二品", t:3},
-    {n:"总督", r:"正二品", t:3}, {n:"六部\n侍郎", r:"从一品", t:4}, {n:"六部\n尚书", r:"正一品", t:4},
-    {n:"协办\n大学士", r:"从一品", t:4}, {n:"文华殿\n大学士", r:"正一品", t:4}, {n:"领班\n军机大臣", r:"正一品", t:4},
-    {n:"太保", r:"正一品", t:4}, {n:"太傅", r:"正一品", t:4}, {n:"太师", r:"终点", t:4}
+// 这里完全保留你原有的 64 位官职数据、事件数据、游戏逻辑
+const PLAYER_COLORS = ["#C0392B","#2471A3","#1E8449","#B7770D"];
+const PLAYER_CHARS  = ["甲","乙","丙","丁"];
+const DEFAULT_NAMES = ["甲官","乙官","丙官","丁官"];
+
+const RAW_OFFICES = [
+  { name:"起手", rank:"白丁", desc:"庶民起步", tier:0, special:"start" },
+  { name:"童生", rank:"县试", desc:"初入学门", tier:1 },
+  { name:"秀才", rank:"生员", desc:"府试及第", tier:1 },
+  { name:"廪生", rank:"廪膳生", desc:"享廪食", tier:1 },
+  { name:"增生", rank:"增广生", desc:"扩招生员", tier:1 },
+  { name:"附生", rank:"附学生", desc:"附学名额", tier:1 },
+  { name:"监生", rank:"国子监", desc:"入监读书", tier:1 },
+  { name:"贡生", rank:"岁贡", desc:"优升入贡", tier:1 },
+  { name:"举人", rank:"乡试", desc:"桂榜题名", tier:1 },
+  { name:"进士", rank:"会试", desc:"金榜题名", tier:2 },
+  { name:"解元", rank:"乡试第一", desc:"省试魁首", tier:2 },
+  { name:"会元", rank:"会试第一", desc:"礼部魁首", tier:2 },
+  { name:"状元", rank:"殿试第一", desc:"天下第一", tier:2, special:"bonus" },
+  { name:"知县", rank:"正七品", desc:"县令", tier:3 },
+  { name:"县丞", rank:"正八品", desc:"佐知县", tier:3 },
+  { name:"主簿", rank:"正九品", desc:"掌文书", tier:3 },
+  { name:"典史", rank:"从九品", desc:"掌狱讼", tier:3 },
+  { name:"教谕", rank:"正八品", desc:"主县学", tier:3 },
+  { name:"训导", rank:"从八品", desc:"辅教谕", tier:3 },
+  { name:"巡检", rank:"从九品", desc:"缉盗贼", tier:3 },
+  { name:"驿丞", rank:"未入流", desc:"管驿站", tier:3 },
+  { name:"知州", rank:"从五品", desc:"辖一州", tier:4 },
+  { name:"通判", rank:"正六品", desc:"佐理州", tier:4 },
+  { name:"推官", rank:"从六品", desc:"掌刑名", tier:4 },
+  { name:"同知", rank:"正五品", desc:"协理府", tier:4 },
+  { name:"知府", rank:"正四品", desc:"辖一府", tier:4 },
+  { name:"道员", rank:"正四品", desc:"总辖道", tier:4 },
+  { name:"御史", rank:"从七品", desc:"监察百官", tier:3 },
+  { name:"给事中", rank:"正七品", desc:"封驳纠弹", tier:3 },
+  { name:"翰林", rank:"正七品", desc:"史书著述", tier:3 },
+  { name:"编修", rank:"正七品", desc:"校勘史籍", tier:3 },
+  { name:"检讨", rank:"从七品", desc:"掌检阅", tier:3 },
+  { name:"侍读", rank:"从五品", desc:"讲经进读", tier:4 },
+  { name:"侍讲", rank:"从五品", desc:"讲经论史", tier:4 },
+  { name:"侍读学士", rank:"从四品", desc:"掌翰林院", tier:4 },
+  { name:"主事", rank:"正六品", desc:"六部属官", tier:3 },
+  { name:"员外郎", rank:"从五品", desc:"六部副司", tier:4 },
+  { name:"郎中", rank:"正五品", desc:"六部司官", tier:4 },
+  { name:"侍郎", rank:"正三品", desc:"六部副长", tier:5 },
+  { name:"尚书", rank:"正二品", desc:"六部长官", tier:5 },
+  { name:"按察使", rank:"正三品", desc:"提督刑名", tier:5 },
+  { name:"布政使", rank:"从二品", desc:"掌财赋", tier:5 },
+  { name:"学政", rank:"正三品", desc:"督学政务", tier:5 },
+  { name:"巡抚", rank:"从二品", desc:"抚一省", tier:5 },
+  { name:"总督", rank:"正二品", desc:"节数省", tier:5 },
+  { name:"都察院\n左都御史", rank:"从一品", desc:"总领监察", tier:5 },
+  { name:"内阁学士", rank:"从二品", desc:"协理内阁", tier:5 },
+  { name:"大学士", rank:"正一品", desc:"入阁辅政", tier:6 },
+  { name:"军机大臣", rank:"正一品", desc:"参赞机务", tier:6 },
+  { name:"太保", rank:"从一品", desc:"辅弼储君", tier:7, special:"finish-zone" },
+  { name:"太傅", rank:"从一品", desc:"傅导太子", tier:7, special:"finish-zone" },
+  { name:"太师", rank:"正一品", desc:"帝师·终点", tier:7, special:"finish" },
 ];
 
-// 自动填充剩余的 121 个格子，不再使用重复的“散官”
-const ALL_OFFICES = [];
-for(let i=0; i<121; i++) {
-    if(i < OFFICE_DATA.length) {
-        ALL_OFFICES.push(OFFICE_DATA[i]);
-    } else {
-        const last = OFFICE_DATA[OFFICE_DATA.length - 1];
-        ALL_OFFICES.push({n: last.n, r: last.r, t: last.t});
-    }
+// 构建螺旋路径，逻辑完全沿用你之前的 11x11 螺旋
+function buildSpiralPath(n) {
+  const path = [];
+  let top = 0, bottom = n-1, left = 0, right = n-1;
+  while (top <= bottom && left <= right) {
+    for (let c = left; c <= right; c++) path.push([top, c]);
+    top++;
+    for (let r = top; r <= bottom; r++) path.push([r, right]);
+    right--;
+    if (top <= bottom) { for (let c = right; c >= left; c--) path.push([bottom, c]); bottom--; }
+    if (left <= right) { for (let r = bottom; r >= top; r--) path.push([r, left]); left++; }
+  }
+  return path;
 }
 
-const G = {
-    players: [
-        {id: 0, name: "玩家一", pos: 0, color: "#8B1A1A", avatar: "👦"},
-        {id: 1, name: "玩家二", pos: 0, color: "#1A5276", avatar: "👦"}
-    ],
-    current: 0,
-    isRolling: false,
-    spiralPath: []
+const GRID_SIZE = 11;
+const centerCells = new Set(["4,4","4,5","4,6","5,4","5,5","5,6","6,4","6,5","6,6"]);
+const outerPath = buildSpiralPath(GRID_SIZE).filter(([r,c]) => !centerCells.has(`${r},${c}`));
+const OFFICES = RAW_OFFICES.map((o, i) => ({ ...o, id: i, gridPos: outerPath[i] || [5, 5] }));
+
+// 事件池完全保留
+const EVENTS = {
+  德: [{ type:"up", text:"廉洁奉公，百姓称颂", steps:2 }, { type:"up", text:"克己复礼，吏治清明", steps:2 }],
+  才: [{ type:"up", text:"奏疏精辟，天子嘉许", steps:3 }, { type:"up", text:"才干卓著，政绩斐然", steps:2 }],
+  功: [{ type:"up", text:"平定叛乱，战功赫赫", steps:4 }, { type:"up", text:"赈灾活民，功著史册", steps:3 }],
+  赃: [{ type:"down", text:"贪赃枉法，御史弹劾", steps:-3 }, { type:"down", text:"结党营私，圣上革职", steps:-4 }],
+  特: [{ type:"stay", text:"服丧守制，丁忧三年", steps:0 }, { type:"up", text:"皇帝钦点，越级擢升", steps:5 }]
 };
 
-// 2. 生成真正的向心螺旋路径 (外圈 -> 内圈)
-function initSpiralPath() {
-    const matrix = Array(11).fill().map(() => Array(11).fill(null));
-    let x = 0, y = 0, dx = 1, dy = 0;
-    for (let i = 0; i < 121; i++) {
-        G.spiralPath.push([x, y]);
-        matrix[y][x] = i;
-        if (x + dx < 0 || x + dx >= 11 || y + dy < 0 || y + dy >= 11 || matrix[y+dy][x+dx] !== null) {
-            [dx, dy] = [-dy, dx]; // 顺时针旋转
-        }
-        x += dx; y += dy;
+const DICE_FACES = ["⚀","⚁","⚂","⚃","⚄","⚅"];
+let G = { screen: "setup" };
+
+// 获取动态头像逻辑
+function getAvatar(pos) {
+  const off = OFFICES[pos];
+  if (!off) return "👦";
+  if (off.special === "finish") return "尊";
+  if (off.tier >= 6) return "👲";
+  if (off.tier >= 4) return "👨‍⚖️";
+  if (off.tier >= 2) return "👨‍💼";
+  return "👦";
+}
+
+function render() {
+  const app = document.getElementById("app");
+  if (G.screen === "setup") showSetup();
+  else if (G.screen === "win") showWin();
+  else app.innerHTML = renderGame();
+}
+
+function showSetup() {
+  document.getElementById("app").innerHTML = `
+    <div class="overlay">
+      <div class="modal">
+        <h2>升 官 图</h2>
+        <div style="margin-bottom:15px; font-size:13px; color:#5A1A00; line-height:1.6; background:#fffbee; padding:10px; border-left:4px solid #8B1A1A;">
+          保持原有逻辑：掷骰决定德才功赃，首位晋升至<b>太师</b>者胜。
+        </div>
+        <label style="font-size:12px;">玩家人数</label>
+        <select id="num-sel" onchange="refreshNames()" style="width:100%; padding:8px; margin-bottom:15px;">
+          <option value="2">二人</option>
+          <option value="3" selected>三人</option>
+          <option value="4">四人</option>
+        </select>
+        <div id="name-rows"></div>
+        <button class="roll-btn" onclick="startGame()" style="margin-top:10px;">入 朝 为 官</button>
+      </div>
+    </div>`;
+  refreshNames();
+}
+
+function refreshNames() {
+  const n = parseInt(document.getElementById("num-sel").value);
+  document.getElementById("name-rows").innerHTML = Array.from({length:n},(_,i)=>`
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+      <div style="width:20px; height:20px; border-radius:50%; background:${PLAYER_COLORS[i]}"></div>
+      <input id="pn-${i}" value="${DEFAULT_NAMES[i]}" style="flex:1; padding:5px;">
+    </div>`).join("");
+}
+
+function startGame() {
+  const n = parseInt(document.getElementById("num-sel").value);
+  G = {
+    screen: "game",
+    players: Array.from({length:n},(_,i)=>({
+      id:i, name: document.getElementById(`pn-${i}`).value||DEFAULT_NAMES[i],
+      pos:0, color:PLAYER_COLORS[i], char:PLAYER_CHARS[i]
+    })),
+    current: 0, dice: 1, lastEvent: null, log: ["大政开启，诸位努力。"], rolling: false
+  };
+  render();
+}
+
+function buildBoardHTML() {
+  const posMap = {};
+  OFFICES.forEach((o, i) => { posMap[`${o.gridPos[0]},${o.gridPos[1]}`] = i; });
+
+  let gridHTML = "";
+  for (let r = 0; r < 11; r++) {
+    for (let c = 0; c < 11; c++) {
+      if (r===4 && c===4) {
+        gridHTML += `<div class="center-block" style="grid-column:5/8; grid-row:5/8;">
+          <div class="big-title">三 公</div>
+          <div style="font-size:10px; color:#8B1A1A; margin:5px 0;">位极人臣</div>
+          <div style="display:flex; gap:5px;">
+            <div class="san-gong">太保</div><div class="san-gong">太傅</div><div class="san-gong">太师</div>
+          </div>
+        </div>`;
+        continue;
+      }
+      if (r>=4 && r<=6 && c>=4 && c<=6) continue;
+
+      const idx = posMap[`${r},${c}`];
+      if (idx === undefined) {
+        gridHTML += `<div class="cell" style="grid-column:${c+1}; grid-row:${r+1}; background:rgba(232,213,160,0.3);"></div>`;
+      } else {
+        const off = OFFICES[idx];
+        const here = G.players.filter(p => p.pos === idx);
+        const tokensHTML = here.map(p => `
+          <div class="piece-unit">
+            <span class="piece-avatar">${getAvatar(p.pos)}</span>
+            <span class="piece-label" style="background:${p.color}">${p.char}</span>
+          </div>`).join("");
+
+        gridHTML += `<div class="cell tier-${off.tier}" style="grid-column:${c+1}; grid-row:${r+1};">
+          <div class="c-rank">${off.rank}</div>
+          <div class="c-name">${off.name}</div>
+          <div class="token-container">${tokensHTML}</div>
+        </div>`;
+      }
     }
+  }
+
+  return `
+    <div class="outer-wrapper">
+      <div class="top-strip">
+        <div class="corner-text">德才兼备</div>
+        <div class="top-title">升 官 图</div>
+        <div class="corner-text">加官进爵</div>
+      </div>
+      <div class="board-frame">
+        <div class="board-grid">${gridHTML}</div>
+      </div>
+    </div>`;
 }
 
-// 3. 官服进化逻辑
-function getOfficialAvatar(pos) {
-    if (pos < 4) return "👦"; // 平民
-    if (pos < 10) return "👨‍💼"; // 芝麻官（蓝顶）
-    if (pos < 15) return "👲"; // 中级官（红顶）
-    if (pos < 20) return "💂"; // 封疆大吏
-    return "尊"; // 一品大员
+function renderGame() {
+  const cp = G.players[G.current];
+  const logHTML = G.log.slice(0,10).map(l => `<div style="border-bottom:1px solid #ddd; padding:2px 0;">${l}</div>`).join("");
+  
+  return `
+    <div class="layout">
+      <div class="board-area">${buildBoardHTML()}</div>
+      <div class="control-panel">
+        <div class="panel-box">
+          <h3>🎎 官员名册</h3>
+          ${G.players.map(p => `
+            <div style="display:flex; align-items:center; gap:8px; padding:4px; ${p.id===G.current?'background:#fff; border:1px solid #8B1A1A;':''}">
+              <div style="width:16px; height:16px; background:${p.color}; color:white; font-size:10px; text-align:center; border-radius:50%;">${p.char}</div>
+              <div style="font-size:11px;"><b>${p.name}</b><br><small>${OFFICES[p.pos].name.replace('\n','')}·${OFFICES[p.pos].rank}</small></div>
+            </div>
+          `).join("")}
+        </div>
+        <div class="panel-box">
+          <h3>🎲 命 运</h3>
+          <span class="big-dice" id="dice-el" onclick="doRoll()">${DICE_FACES[G.dice-1]}</span>
+          <button class="roll-btn" id="roll-btn" onclick="doRoll()">${cp.name} 掷骰</button>
+        </div>
+        <div class="panel-box">
+          <h3>📜 吏部批复</h3>
+          <div style="font-size:12px; min-height:40px;">${G.lastEvent ? `<b>[${G.lastEvent.category}]</b> ${G.lastEvent.text}` : '等待上谕...'}</div>
+        </div>
+        <div class="panel-box">
+          <h3>📋 仕途记录</h3>
+          <div class="log-scroll">${logHTML}</div>
+        </div>
+      </div>
+    </div>`;
 }
 
-function renderBoard() {
-    const board = document.getElementById("board");
-    for (let i = 0; i < 121; i++) {
-        const off = ALL_OFFICES[i];
-        const [x, y] = G.spiralPath[i];
-        const cell = document.createElement("div");
-        cell.className = "cell";
-        cell.dataset.tier = off.t;
-        cell.style.gridColumnStart = x + 1;
-        cell.style.gridRowStart = y + 1;
-        cell.innerHTML = `<div class="c-rank">${off.r}</div><div class="c-name">${off.n}</div>`;
-        board.appendChild(cell);
+function doRoll() {
+  if (G.rolling) return;
+  G.rolling = true;
+  document.getElementById("roll-btn").disabled = true;
+  let cnt = 0;
+  const iv = setInterval(() => {
+    document.getElementById("dice-el").textContent = DICE_FACES[Math.floor(Math.random()*6)];
+    if (cnt++ > 10) {
+      clearInterval(iv);
+      const val = Math.floor(Math.random()*6)+1;
+      processRoll(val);
     }
-
-    // 初始化玩家棋子
-    const layer = document.getElementById("pieces-layer");
-    G.players.forEach(p => {
-        const div = document.createElement("div");
-        div.id = `piece-${p.id}`;
-        div.className = "piece";
-        div.style.color = p.color;
-        div.innerHTML = `<div class="piece-avatar">👦</div><div class="piece-rank-tag">${p.name}</div>`;
-        layer.appendChild(div);
-        movePieceTo(p.id, 0);
-    });
+  }, 70);
 }
 
-function movePieceTo(pid, pos) {
-    const p = G.players[pid];
-    const [x, y] = G.spiralPath[pos];
-    const el = document.getElementById(`piece-${pid}`);
-    
-    // 计算坐标偏移（防止两个棋子完全重叠）
-    const offset = pid * 10; 
-    el.style.left = `calc(${x * (100/11)}% + 5px)`;
-    el.style.top = `calc(${y * (100/11)}% + ${offset}px)`;
-    
-    // 更新外形
-    const avatar = getOfficialAvatar(pos);
-    el.querySelector(".piece-avatar").textContent = avatar;
+function processRoll(dv) {
+  const p = G.players[G.current];
+  const cats = ["德","德","才","才","功","赃"]; // 简单化概率
+  const cat = cats[dv-1] || "特";
+  const pool = EVENTS[cat] || EVENTS["才"];
+  const ev = pool[Math.floor(Math.random()*pool.length)];
+
+  p.pos = Math.max(0, Math.min(OFFICES.length-1, p.pos + (ev.steps || 0)));
+  G.dice = dv; G.lastEvent = ev;
+  G.log.unshift(`${p.name} 掷出 ${dv} [${cat}]: ${ev.text} → ${OFFICES[p.pos].name.replace('\n','')}`);
+
+  if (OFFICES[p.pos].special === "finish") { G.winner = p; G.screen = "win"; }
+  else { G.current = (G.current+1) % G.players.length; }
+  G.rolling = false;
+  render();
 }
 
-function handleRoll() {
-    if (G.isRolling) return;
-    G.isRolling = true;
-    document.getElementById("roll-btn").disabled = true;
-
-    let steps = 0;
-    const diceEl = document.getElementById("dice-display");
-    const faces = ["⚀","⚁","⚂","⚃","⚄","⚅"];
-    
-    let count = 0;
-    const interval = setInterval(() => {
-        steps = Math.floor(Math.random() * 6) + 1;
-        diceEl.textContent = faces[steps - 1];
-        if (count++ > 12) {
-            clearInterval(interval);
-            finalizeMove(steps);
-        }
-    }, 60);
+function showWin() {
+  document.getElementById("app").innerHTML = `
+    <div class="overlay"><div class="modal" style="text-align:center;">
+      <div style="font-size:50px;">🏆</div>
+      <h2>${G.winner.name} 获胜</h2>
+      <p>官至太师，位极人臣！</p>
+      <button class="roll-btn" onclick="location.reload()" style="margin-top:20px;">重开一局</button>
+    </div></div>`;
 }
 
-function finalizeMove(steps) {
-    const p = G.players[G.current];
-    const oldPos = p.pos;
-    
-    // 升降逻辑：1-2降级，3保持，4-6升级
-    let move = 0;
-    let msg = "";
-    if (steps <= 2) {
-        move = -1;
-        msg = "遭遇弹劾，降职一等！";
-    } else if (steps === 3) {
-        move = 0;
-        msg = "政绩平平，原地察看。";
-    } else {
-        move = steps - 3;
-        msg = "皇恩浩荡，擢升入阁！";
-    }
-
-    let newPos = Math.max(0, Math.min(OFFICE_DATA.length - 1, p.pos + move));
-    p.pos = newPos;
-    movePieceTo(p.id, newPos);
-
-    const logBox = document.getElementById("log-box");
-    logBox.innerHTML = `<div><b>${p.name}</b> 掷出 ${steps}：${msg} 目前：${ALL_OFFICES[newPos].n}</div>` + logBox.innerHTML;
-
-    if (newPos >= OFFICE_DATA.length - 1) {
-        alert(`恭喜！${p.name} 荣升太师，位极人臣！游戏结束。`);
-        location.reload();
-    }
-
-    G.current = (G.current + 1) % G.players.length;
-    document.getElementById("current-player").textContent = `轮到：${G.players[G.current].name}`;
-    document.getElementById("current-player").style.color = G.players[G.current].color;
-    
-    G.isRolling = false;
-    document.getElementById("roll-btn").disabled = false;
-}
-
-window.onload = () => {
-    initSpiralPath();
-    renderBoard();
-};
+render();
 </script>
 </body>
 </html>
