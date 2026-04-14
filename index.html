@@ -28,18 +28,15 @@ body {
   justify-content: center;
 }
 
-/* 横版主布局 */
 .layout {
   display: flex;
   width: 100%;
   height: 100%;
-  max-height: 90vh;
   gap: 8px;
   align-items: center;
   justify-content: center;
 }
 
-/* 棋盘区域：固定正方形，手机横版完美显示 */
 .board-area {
   flex: 0 0 auto;
   height: 94vh;
@@ -47,7 +44,6 @@ body {
   aspect-ratio: 1;
 }
 
-/* 右侧面板：自适应高度 */
 .control-panel {
   flex: 0 0 190px;
   height: 94vh;
@@ -59,7 +55,6 @@ body {
   padding-right: 2px;
 }
 
-/* 滚动条美化 */
 .control-panel::-webkit-scrollbar { width: 3px; }
 .control-panel::-webkit-scrollbar-thumb { background: #8B1A1A66; border-radius: 2px; }
 
@@ -131,7 +126,6 @@ body {
 }
 .c-rank { font-size: 8px; color: #8B1A1A; line-height: 1.1; text-align: center; }
 .c-name { font-size: 10px; color: #3d0a00; font-weight: bold; line-height: 1.15; text-align: center; }
-.c-sub  { font-size: 7px; color: #6B3020; line-height: 1.1; text-align: center; }
 
 .center-block {
   grid-column: 5 / 8;
@@ -144,8 +138,6 @@ body {
   background: #fff8ee;
   z-index: 2;
   padding: 2px;
-  position: relative;
-  overflow: hidden;
 }
 .san-gong {
   display: flex;
@@ -155,7 +147,6 @@ body {
   padding: 1px 2px;
   background: rgba(255,248,238,0.85);
   border-radius: 2px;
-  z-index: 1;
 }
 .san-gong .sg-name { font-size: 11px; font-weight: bold; color: #8B1A1A; }
 .san-gong .sg-rank { font-size: 8px; color: #5A1A00; }
@@ -178,12 +169,7 @@ body {
   gap: 1px;
   margin-top: 1px;
 }
-.cell.highlight {
-  box-shadow: inset 0 0 0 2px #C8963C;
-  background: #fff3cc !important;
-}
 
-/* 面板样式 */
 .panel-box {
   background: #f5e8c8;
   border: 1px solid #8B1A1A;
@@ -211,8 +197,7 @@ body {
   font-size: 11px;
 }
 .player-row.active { border-color: #C8963C; background: #fff3e0; }
-.player-dot { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; display:flex; align-items:center; justify-content:center; font-size:10px; }
-.player-info-text { flex: 1; min-width: 0; }
+.player-dot { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0; display:flex; align-items:center; justify-content:center; font-size:10px; color:#fff; }
 .p-name { font-weight: bold; color: #3d0a00; font-size: 11px; }
 .p-pos  { color: #7A4020; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -220,11 +205,9 @@ body {
   font-size: 50px;
   text-align: center;
   cursor: pointer;
-  display: block;
   line-height: 1;
   margin: 4px 0;
   user-select: none;
-  transition: transform .1s;
 }
 .big-dice:active { transform: scale(0.88); }
 .roll-btn {
@@ -235,9 +218,7 @@ body {
   padding: 6px 0;
   font-size: 13px;
   cursor: pointer;
-  font-family: inherit;
   border-radius: 4px;
-  letter-spacing: 1px;
 }
 .roll-btn:hover { background: #6B0A0A; }
 .roll-btn:disabled { background: #aaa; cursor: not-allowed; }
@@ -273,7 +254,6 @@ body {
 }
 .log-line { border-bottom: 0.5px solid #C8963C44; padding: 1px 0; }
 
-/* 弹窗 */
 .overlay {
   position: fixed; inset: 0;
   background: #00000088;
@@ -288,65 +268,47 @@ body {
   width: 90%;
   border-radius: 6px;
 }
-.modal h2 { text-align: center; color: #8B1A1A; font-size: 20px; margin-bottom: 12px; letter-spacing: 4px; }
+.modal h2 { text-align: center; color: #8B1A1A; font-size: 20px; margin-bottom: 12px; }
 .modal-intro {
   font-size: 12px; color: #5A1A00; line-height: 1.6;
   background: #fffbee; border-left: 3px solid #C8963C;
   padding: 8px 10px; margin-bottom: 12px;
 }
-.form-label { font-size: 12px; color: #5A1A00; display: block; margin-bottom: 5px; }
+.form-label { font-size: 12px; color: #5A1A00; margin-bottom: 5px; }
 .form-select {
-  width: 100%; padding: 6px; font-family: inherit; font-size: 13px;
-  border: 1px solid #8B1A1A; background: #fff8ee; color: #3d0a00;
+  width: 100%; padding: 6px; font-size: 13px;
+  border: 1px solid #8B1A1A; background: #fff8ee;
   margin-bottom: 10px; border-radius: 4px;
 }
 .pname-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
 .pname-dot { width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; }
 .pname-input {
-  flex: 1; padding: 5px 8px; font-family: inherit; font-size: 12px;
-  border: 1px solid #C8963C; background: #fff8ee; color: #3d0a00;
+  flex: 1; padding: 5px 8px;
+  border: 1px solid #C8963C; background: #fff8ee;
   border-radius: 4px;
 }
 .start-btn {
   width: 100%; padding: 10px; background: #8B1A1A; color: #f5e8c8;
-  border: none; font-size: 15px; cursor: pointer; font-family: inherit;
-  letter-spacing: 3px; border-radius: 4px; margin-top: 6px;
+  border: none; font-size: 15px; cursor: pointer;
+  border-radius: 4px; margin-top: 6px;
 }
-.start-btn:hover { background: #6B0A0A; }
 .win-modal { text-align: center; }
 .win-icon { font-size: 56px; margin: 8px 0; }
-.win-name { font-size: 22px; color: #8B1A1A; font-weight: bold; margin-bottom: 6px; }
-.win-sub  { font-size: 13px; color: #5A1A00; line-height: 1.6; margin-bottom: 14px; }
+.win-name { font-size: 22px; color: #8B1A1A; font-weight: bold; }
+.win-sub  { font-size: 13px; color: #5A1A00; margin-bottom: 14px; }
 .restart-btn {
   padding: 8px 28px; background: #8B1A1A; color: #f5e8c8;
-  border: none; font-size: 14px; cursor: pointer; font-family: inherit;
-  letter-spacing: 2px; border-radius: 4px;
+  border: none; font-size: 14px; cursor: pointer;
+  border-radius: 4px;
 }
 
-/* 禁止竖屏提示（可选）*/
+/* 移除所有强制隐藏，横屏竖屏都能显示游戏 */
 .rotate-tip {
-  display: none;
-  position: fixed; inset: 0;
-  background: #c8a96e;
-  z-index: 999;
-  align-items: center; justify-content: center;
-  flex-direction: column; gap: 20px;
-  color: #8B1A1A; font-size: 16px;
-}
-.rotate-tip span { font-size: 40px; }
-
-@media (max-width: 600px) and (orientation: portrait) {
-  .layout { display: none !important; }
-  .rotate-tip { display: flex !important; }
+  display: none !important;
 }
 </style>
 </head>
 <body>
-
-<div class="rotate-tip">
-  <span>🔄</span>
-  请横屏使用，体验更佳
-</div>
 
 <div id="app"></div>
 
@@ -591,7 +553,7 @@ function renderGame() {
   const playerRows = players.map(p => {
     const off = OFFICES[p.pos] || OFFICES[0];
     return `<div class="player-row ${p.id===current?'active':''}">
-      <div class="player-dot" style="background:${p.color}; color:white">${p.char}</div>
+      <div class="player-dot" style="background:${p.color}">${p.char}</div>
       <div class="player-info-text">
         <div class="p-name">${p.name}</div>
         <div class="p-pos">${off.name.replace('\n','·')}·${off.rank}</div>
@@ -626,9 +588,6 @@ function renderGame() {
 </div>`;
 }
 
-// ============================
-//  核心：已删除图片
-// ============================
 function buildBoardHTML(players, currentIdx) {
   const posMap = {};
   OFFICES.forEach((o, i) => {
@@ -680,10 +639,9 @@ function buildBoardHTML(players, currentIdx) {
       let extraStyle = "";
       if (off.special==="start") extraStyle = "border:1.5px solid #5A8A3A !important;background:#d8ecc8 !important;";
       if (off.special==="bonus") extraStyle = "border:1.5px solid #C8963C !important;background:#fff3cc !important;";
-      const displayName = off.name.replace('\n','');
       const nameLines = off.name.split('\n');
       rows += `
-        <div class="cell" style="${bg};${extraStyle};grid-column:${c+1};grid-row:${r+1}" onclick="cellClick(${idx})" title="${off.name}·${off.rank}：${off.desc}">
+        <div class="cell" style="${bg};${extraStyle};grid-column:${c+1};grid-row:${r+1}">
           <div class="cell-inner">
             <div class="c-rank">${off.rank}</div>
             ${nameLines.map(l=>`<div class="c-name">${l}</div>`).join("")}
@@ -705,11 +663,6 @@ function buildBoardHTML(players, currentIdx) {
 </div>`;
 }
 
-function cellClick(idx) {
-  const off = OFFICES[idx];
-  if (!off) return;
-  console.log(off.name, off.rank, off.desc);
-}
 function doRoll() {
   if (G.rolling) return;
   G.rolling = true;
