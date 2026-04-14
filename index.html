@@ -2,160 +2,321 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: "STKaiti", "KaiTi", "华文楷体", "楷体", serif;
   background: #c8a96e;
   min-height: 100vh;
-  padding: 8px;
+  padding: 12px;
   display: flex;
+  align-items: center;
   justify-content: center;
-  align-items: flex-start; /* 移动端顶部对齐，方便滚动 */
 }
-
-/* 核心布局：手机端自动纵向，电脑端横向 */
-.layout {
-  display: flex;
-  flex-direction: column; /* 默认移动端纵向 */
-  gap: 12px;
-  width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-@media (min-width: 800px) {
-  .layout { flex-direction: row; align-items: flex-start; }
-}
-
-/* 棋盘容器响应式 */
-.board-area {
-  flex: 1;
-  width: 100%;
-  min-width: 0;
-}
-
 .outer-wrapper {
   background: #e8d5a0;
   border: 4px solid #8B1A1A;
   border-radius: 4px;
+  max-width: 860px;
   width: 100%;
-  padding: 4px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  margin: 0 auto;
+  position: relative;
+  padding: 6px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.2);
 }
-
 .top-strip {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 10px;
+  padding: 4px 6px 6px;
 }
 .top-title {
-  font-size: 1.4rem;
+  font-size: 22px;
   color: #8B1A1A;
   font-weight: bold;
-  letter-spacing: 6px;
+  letter-spacing: 10px;
   text-align: center;
   flex: 1;
 }
-
+.corner-text {
+  font-size: 12px;
+  color: #8B1A1A;
+  writing-mode: vertical-rl;
+  line-height: 1.3;
+}
+.board-frame {
+  border: 2px solid #8B1A1A;
+  background: #f5e8c8;
+  position: relative;
+  border-radius: 2px;
+}
 .board-grid {
   display: grid;
   grid-template-columns: repeat(11, 1fr);
   grid-template-rows: repeat(11, 1fr);
   width: 100%;
-  aspect-ratio: 1 / 1; /* 强制正方形，解决手机变形核心 */
-  border: 1.5px solid #8B1A1A;
+  aspect-ratio: 1;
+  position: relative;
 }
-
 .cell {
-  border: 0.1px solid #8B1A1A44;
+  border: 0.5px solid #8B1A1A88;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  padding: 2px;
+  cursor: pointer;
   position: relative;
-  background: #f5e8c8;
+  min-height: 0;
+  overflow: hidden;
+  transition: background 0.15s;
 }
-
-/* 移动端文字自动缩小 */
+.cell:hover { background: #ffe8aa88 !important; }
 .cell-inner {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   width: 100%;
-  transform: scale(0.9); /* 整体微调防止溢出 */
+  height: 100%;
+  gap: 1px;
 }
-.c-rank { font-size: 8px; color: #8B1A1A; white-space: nowrap; transform: scale(0.8); }
-.c-name { font-size: 10px; font-weight: bold; color: #3d0a00; line-height: 1.1; text-align: center; }
+.c-rank { font-size: 9px; color: #8B1A1A; line-height: 1.1; text-align: center; }
+.c-name { font-size: 11px; color: #3d0a00; font-weight: bold; line-height: 1.2; text-align: center; }
+.c-sub  { font-size: 8px; color: #6B3020; line-height: 1.1; text-align: center; }
 
-@media (min-width: 600px) {
-  .c-name { font-size: 12px; }
-  .c-rank { font-size: 9px; }
-}
+.tier-0  { background: #e8f0d8; }
+.tier-1  { background: #f5e8c8; }
+.tier-2  { background: #f0e0b8; }
+.tier-3  { background: #ead8b0; }
+.tier-4  { background: #e0c890; }
+.tier-5  { background: #f8d8c0; }
+.tier-6  { background: #f8c8a8; }
+.tier-center { background: #f5e0d0; border: 2px solid #8B1A1A !important; }
 
-/* 中心三公区域 */
 .center-block {
   grid-column: 5 / 8;
   grid-row: 5 / 8;
-  background: #fff8ee;
   border: 2px solid #8B1A1A;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 10;
+  background: #fff8ee;
+  z-index: 2;
+  padding: 4px;
+  position: relative;
+  overflow: hidden;
 }
-.big-title { font-size: 1.1rem; font-weight: bold; color: #8B1A1A; }
-.san-gong { border: 1px solid #8B1A1A; padding: 2px; font-size: 9px; transform: scale(0.85); }
+.san-gong {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #8B1A1A;
+  padding: 2px 4px;
+  background: rgba(255,248,238,0.85);
+  border-radius: 2px;
+  z-index: 1;
+}
+.san-gong .sg-name { font-size: 12px; font-weight: bold; color: #8B1A1A; }
+.san-gong .sg-rank { font-size: 9px; color: #5A1A00; }
 
-/* 控制面板适配 */
+.token {
+  width: 13px; height: 13px;
+  border-radius: 50%;
+  border: 1px solid #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7px;
+  margin: 0 1px;
+  flex-shrink: 0;
+}
+.tokens-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1px;
+  margin-top: 2px;
+}
+.cell.highlight {
+  box-shadow: inset 0 0 0 2px #C8963C;
+  background: #fff3cc !important;
+}
+
+.layout {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.board-area {
+  flex: 0 1 auto;
+  min-width: 320px;
+  max-width: 600px;
+}
 .control-panel {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 手机上双列显示节省空间 */
-  gap: 8px;
-}
-
-@media (min-width: 800px) {
-  .control-panel { width: 220px; display: flex; flex-direction: column; }
+  width: 190px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .panel-box {
   background: #f5e8c8;
   border: 1px solid #8B1A1A;
+  padding: 10px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+.panel-box h3 {
+  font-size: 14px;
+  color: #8B1A1A;
+  border-bottom: 1px solid #C8963C88;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  margin-bottom: 5px;
+  border: 0.5px solid transparent;
+  font-size: 12px;
+}
+.player-row.active { border-color: #C8963C; background: #fff3e0; }
+.player-dot { width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; display:flex; align-items:center; justify-content:center; font-size:11px; }
+.player-info-text { flex: 1; min-width: 0; }
+.p-name { font-weight: bold; color: #3d0a00; font-size: 12px; }
+.p-pos  { color: #7A4020; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.big-dice {
+  font-size: 56px;
+  text-align: center;
+  cursor: pointer;
+  display: block;
+  line-height: 1;
+  margin: 6px 0;
+  user-select: none;
+  transition: transform .1s;
+}
+.big-dice:active { transform: scale(0.88); }
+.roll-btn {
+  width: 100%;
+  background: #8B1A1A;
+  color: #f5e8c8;
+  border: none;
+  padding: 8px 0;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+  border-radius: 4px;
+  letter-spacing: 2px;
+}
+.roll-btn:hover { background: #6B0A0A; }
+.roll-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+.event-display {
+  background: #fff8ee;
+  border: 0.5px solid #C8963C;
   padding: 8px;
+  font-size: 12px;
+  color: #3d0a00;
+  min-height: 54px;
+  line-height: 1.6;
   border-radius: 4px;
 }
-.panel-box h3 { font-size: 12px; color: #8B1A1A; border-bottom: 1px solid #C8963C66; margin-bottom: 5px; }
+.ev-tag {
+  display: inline-block;
+  font-size: 11px;
+  padding: 0 6px;
+  border-radius: 3px;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+.ev-up   { background: #d4edda; color: #155724; }
+.ev-down { background: #f8d7da; color: #721c24; }
+.ev-stay { background: #d1ecf1; color: #0c5460; }
 
-/* 骰子和按钮 */
-.big-dice { font-size: 40px; text-align: center; display: block; margin: 4px 0; cursor: pointer; }
-.roll-btn { 
-  width: 100%; background: #8B1A1A; color: #f5e8c8; border: none; 
-  padding: 8px 0; font-size: 14px; border-radius: 4px; cursor: pointer;
+.log-scroll {
+  max-height: 110px;
+  overflow-y: auto;
+  font-size: 11px;
+  color: #5A3020;
+  line-height: 1.6;
+}
+.log-line { border-bottom: 0.5px solid #C8963C44; padding: 2px 0; }
+
+.overlay {
+  position: fixed; inset: 0;
+  background: #00000088;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+}
+.modal {
+  background: #f5e8c8;
+  border: 3px solid #8B1A1A;
+  padding: 26px;
+  max-width: 440px;
+  width: 92%;
+  border-radius: 6px;
+}
+.modal h2 { text-align: center; color: #8B1A1A; font-size: 22px; margin-bottom: 14px; letter-spacing: 4px; }
+.modal-intro {
+  font-size: 13px; color: #5A1A00; line-height: 1.7;
+  background: #fffbee; border-left: 3px solid #C8963C;
+  padding: 10px 12px; margin-bottom: 16px;
+}
+.form-label { font-size: 13px; color: #5A1A00; display: block; margin-bottom: 6px; }
+.form-select {
+  width: 100%; padding: 7px; font-family: inherit; font-size: 14px;
+  border: 1px solid #8B1A1A; background: #fff8ee; color: #3d0a00;
+  margin-bottom: 14px; border-radius: 4px;
+}
+.pname-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.pname-dot { width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; }
+.pname-input {
+  flex: 1; padding: 6px 10px; font-family: inherit; font-size: 13px;
+  border: 1px solid #C8963C; background: #fff8ee; color: #3d0a00;
+  border-radius: 4px;
+}
+.start-btn {
+  width: 100%; padding: 12px; background: #8B1A1A; color: #f5e8c8;
+  border: none; font-size: 17px; cursor: pointer; font-family: inherit;
+  letter-spacing: 4px; border-radius: 4px; margin-top: 8px;
+}
+.start-btn:hover { background: #6B0A0A; }
+.win-modal { text-align: center; }
+.win-icon { font-size: 64px; margin: 10px 0; }
+.win-name { font-size: 24px; color: #8B1A1A; font-weight: bold; margin-bottom: 8px; }
+.win-sub  { font-size: 14px; color: #5A1A00; line-height: 1.7; margin-bottom: 18px; }
+.restart-btn {
+  padding: 10px 32px; background: #8B1A1A; color: #f5e8c8;
+  border: none; font-size: 15px; cursor: pointer; font-family: inherit;
+  letter-spacing: 3px; border-radius: 4px;
 }
 
-/* 日志滚动区在手机上减小高度 */
-.log-scroll { max-height: 60px; overflow-y: auto; font-size: 10px; }
-@media (min-width: 800px) { .log-scroll { max-height: 150px; } }
-
-/* 遮罩层 */
-.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.modal { background: #f5e8c8; border: 3px solid #8B1A1A; padding: 20px; width: 92%; max-width: 400px; border-radius: 6px; }
-
-.token { width: 10px; height: 10px; font-size: 7px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; margin: 1px; }
+@media (max-width: 600px) {
+  .layout { flex-direction: column; }
+  .control-panel { width: 100%; max-width: 380px; }
+  .c-name { font-size: 10px; }
+  .c-rank { font-size: 8px; }
+}
 </style>
 </head>
 <body>
 <div id="app"></div>
-
 <script>
-// (此处保留你原有的脚本逻辑，仅需确保渲染函数 renderGame 匹配新的 class 即可)
-// 为了确保万无一失，我直接在下面提供简化后的 process 逻辑框架，你可以直接覆盖。
-
+// ============================
+//  DATA: Spiral path (64 cells)
+// ============================
 const PLAYER_COLORS = ["#C0392B","#2471A3","#1E8449","#B7770D"];
 const PLAYER_CHARS  = ["甲","乙","丙","丁"];
 const DEFAULT_NAMES = ["甲官","乙官","丙官","丁官"];
@@ -229,14 +390,12 @@ function buildSpiralPath(n) {
   }
   return path;
 }
-
 const GRID_SIZE = 11;
 const spiralPath = buildSpiralPath(GRID_SIZE);
 const centerCells = new Set();
 for (let r = 4; r <= 6; r++)
   for (let c = 4; c <= 6; c++)
     centerCells.add(`${r},${c}`);
-
 const outerPath = spiralPath.filter(([r,c]) => !centerCells.has(`${r},${c}`));
 const OFFICES = RAW_OFFICES.map((o, i) => ({
   ...o,
@@ -244,116 +403,317 @@ const OFFICES = RAW_OFFICES.map((o, i) => ({
   gridPos: outerPath[i] || [5, 5],
 }));
 
-const DICE_FACES = ["⚀","⚁","⚂","⚃","⚄","⚅"];
+// ============================
+//  EVENTS
+// ============================
 const EVENTS = {
-  德: [{ type:"up", text:"廉洁奉公", steps:2 }, { type:"up", text:"教化有方", steps:1 }],
-  才: [{ type:"up", text:"奏疏精辟", steps:3 }, { type:"up", text:"治理有方", steps:2 }],
-  功: [{ type:"up", text:"平定叛乱", steps:4 }, { type:"up", text:"兴修水利", steps:3 }],
-  赃: [{ type:"down", text:"贪赃枉法", steps:-3 }, { type:"down", text:"结党营私", steps:-4 }],
-  特: [{ type:"stay", text:"服丧守制", steps:0 }, { type:"up", text:"天子嘉奖", steps:5 }]
+  德: [
+    { type:"up", text:"廉洁奉公，百姓称颂", steps:2 },
+    { type:"up", text:"教化有方，文风大兴", steps:1 },
+    { type:"up", text:"克己复礼，吏治清明", steps:2 },
+    { type:"up", text:"仁政爱民，赤子归心", steps:3 },
+    { type:"up", text:"以德化人，远近咸服", steps:1 },
+  ],
+  才: [
+    { type:"up", text:"奏疏精辟，天子嘉许", steps:3 },
+    { type:"up", text:"才干卓著，上官赏识", steps:2 },
+    { type:"up", text:"治理有方，政绩斐然", steps:2 },
+    { type:"up", text:"文章出众，殿试高中", steps:3 },
+    { type:"up", text:"博学多才，擢升重用", steps:1 },
+  ],
+  功: [
+    { type:"up", text:"平定叛乱，战功赫赫", steps:4 },
+    { type:"up", text:"兴修水利，功在百代", steps:3 },
+    { type:"up", text:"赈灾活民，功著史册", steps:3 },
+    { type:"up", text:"外交折冲，安邦定国", steps:2 },
+    { type:"up", text:"察举能臣，有引荐之功", steps:2 },
+  ],
+  赃: [
+    { type:"down", text:"贪赃枉法，御史弹劾", steps:-3 },
+    { type:"down", text:"结党营私，圣上革职", steps:-4 },
+    { type:"down", text:"受贿索贿，发配边疆", steps:-5 },
+    { type:"down", text:"克扣军饷，下狱问罪", steps:-3 },
+    { type:"down", text:"侵吞国帑，降级留用", steps:-2 },
+  ],
+  特: [
+    { type:"stay", text:"皇帝巡幸，接驾候命，暂留原位", steps:0 },
+    { type:"stay", text:"服丧守制，丁忧三年，停仕候职", steps:0 },
+    { type:"up",   text:"皇帝钦点，越级擢升", steps:5 },
+    { type:"down", text:"政敌构陷，虽昭雪仍降级", steps:-2 },
+  ],
 };
-
-let G = { screen: "setup" };
-
-function render() {
-  const app = document.getElementById("app");
-  if (G.screen === "setup") {
-    app.innerHTML = `<div class="overlay"><div class="modal"><h2>升官图</h2><button class="roll-btn" onclick="startGame()">🏯 开始游戏</button></div></div>`;
-  } else if (G.screen === "game") {
-    app.innerHTML = renderGame();
-  } else if (G.screen === "win") {
-    app.innerHTML = `<div class="overlay"><div class="modal"><h2>${G.winner.name} 胜出！</h2><button class="roll-btn" onclick="location.reload()">重新开始</button></div></div>`;
-  }
+const DICE_FACES = ["⚀","⚁","⚂","⚃","⚄","⚅"];
+function getCategory(d) {
+  const r = Math.random();
+  if (d === 6) return r < 0.65 ? "赃" : "特";
+  if (d === 5) return r < 0.55 ? "功" : "才";
+  if (d <= 2)  return r < 0.65 ? "德" : "才";
+  return r < 0.45 ? "才" : "功";
+}
+function pickEvent(cat) {
+  const pool = EVENTS[cat];
+  return { category: cat, ...pool[Math.floor(Math.random() * pool.length)] };
 }
 
+// ============================
+//  STATE
+// ============================
+let G = { screen: "setup" };
+
+// ============================
+//  RENDER
+// ============================
+function render() {
+  document.getElementById("app").innerHTML = G.screen === "game" ? renderGame() : "";
+  if (G.screen === "setup") showSetup();
+  else if (G.screen === "win") showWin();
+}
+
+function showSetup() {
+  const el = document.getElementById("app");
+  el.innerHTML = renderBoardStatic() + `
+<div class="overlay" id="setup-overlay">
+  <div class="modal">
+    <h2>升 官 圖</h2>
+    <div class="modal-intro">
+      源于唐代，盛行明清。玩家轮流掷骰，骰面决定<b>德·才·功·赃</b>四类命运。
+      前三者升官，"赃"则降职。首位从白丁晋升至<b style="color:#8B1A1A">太师</b>者获胜。
+    </div>
+    <label class="form-label">玩家人数</label>
+    <select class="form-select" id="num-sel" onchange="refreshNames()">
+      <option value="2">二人对弈</option>
+      <option value="3" selected>三人共弈</option>
+      <option value="4">四人同台</option>
+    </select>
+    <label class="form-label">玩家名号</label>
+    <div id="name-rows"></div>
+    <button class="start-btn" onclick="startGame()">🏯 入朝为官</button>
+  </div>
+</div>`;
+  refreshNames();
+}
+function refreshNames() {
+  const n = parseInt(document.getElementById("num-sel").value);
+  document.getElementById("name-rows").innerHTML = Array.from({length:n},(_,i)=>`
+    <div class="pname-row">
+      <div class="pname-dot" style="background:${PLAYER_COLORS[i]}"></div>
+      <input class="pname-input" id="pn-${i}" value="${DEFAULT_NAMES[i]}" placeholder="${DEFAULT_NAMES[i]}">
+    </div>`).join("");
+}
 function startGame() {
+  const n = parseInt(document.getElementById("num-sel").value);
   G = {
     screen: "game",
-    players: [{id:0, name:"玩家", pos:0, color:PLAYER_COLORS[0], char:PLAYER_CHARS[0]}, {id:1, name:"对手", pos:0, color:PLAYER_COLORS[1], char:PLAYER_CHARS[1]}],
+    players: Array.from({length:n},(_,i)=>({
+      id:i, name: document.getElementById(`pn-${i}`)?.value||DEFAULT_NAMES[i],
+      pos:0, color:PLAYER_COLORS[i], char:PLAYER_CHARS[i]
+    })),
     current: 0,
     dice: 1,
-    log: ["游戏开始！"],
-    rolling: false
+    lastEvent: null,
+    log: ["游戏开始！各位大人从白丁起步。"],
+    rolling: false,
   };
   render();
 }
 
-function renderGame() {
-  const cp = G.players[G.current];
-  let rows = "";
-  const posMap = {};
-  OFFICES.forEach((o, i) => posMap[`${o.gridPos[0]},${o.gridPos[1]}`] = i);
+function showWin() {
+  const w = G.winner;
+  document.getElementById("app").innerHTML = renderBoardOnly() + `
+<div class="overlay">
+  <div class="modal win-modal">
+    <div class="win-icon">🏆</div>
+    <div class="win-name">${w.char} · ${w.name}</div>
+    <div class="win-sub">荣登<b style="color:#8B1A1A">太师</b>之位，位极人臣！<br>恭祝阁下辅弼君王，千秋万代！</div>
+    <button class="restart-btn" onclick="restartGame()">重 开 一 局</button>
+  </div>
+</div>`;
+}
+function restartGame() { G = { screen:"setup" }; render(); }
 
+function renderBoardStatic() {
+  return `<div style="opacity:0.4;pointer-events:none;filter:blur(1px)">${buildBoardHTML([], -1)}</div>`;
+}
+function renderBoardOnly() {
+  return buildBoardHTML(G.players, G.current);
+}
+
+function renderGame() {
+  const { players, current, dice, lastEvent, log } = G;
+  const cp = players[current];
+  let evHtml = `<div class="event-display" style="color:#7A5030;font-style:italic">等待掷骰…</div>`;
+  if (lastEvent) {
+    const tc = lastEvent.type==="up"?"ev-up":lastEvent.type==="down"?"ev-down":"ev-stay";
+    const tt = lastEvent.type==="up"?"▲升":lastEvent.type==="down"?"▼降":"◆留";
+    const st = lastEvent.steps>0?`+${lastEvent.steps}格`:lastEvent.steps<0?`${lastEvent.steps}格`:"原地";
+    evHtml = `<div class="event-display">
+      <span class="ev-tag ${tc}">${tt}${st}·${lastEvent.category}</span><br>
+      ${lastEvent.text}
+    </div>`;
+  }
+  const playerRows = players.map(p => {
+    const off = OFFICES[p.pos] || OFFICES[0];
+    return `<div class="player-row ${p.id===current?'active':''}">
+      <div class="player-dot" style="background:${p.color}; color:white">${p.char}</div>
+      <div class="player-info-text">
+        <div class="p-name">${p.name}</div>
+        <div class="p-pos">${off.name.replace('\n','·')}·${off.rank}</div>
+      </div>
+    </div>`;
+  }).join("");
+  const logHtml = log.slice(0,12).map(l=>`<div class="log-line">${l}</div>`).join("");
+  return `
+<div class="layout">
+  <div class="board-area">
+    ${buildBoardHTML(players, current)}
+  </div>
+  <div class="control-panel">
+    <div class="panel-box">
+      <h3>⛩ 各位大人</h3>
+      ${playerRows}
+    </div>
+    <div class="panel-box">
+      <h3>🎲 掷 骰</h3>
+      <span class="big-dice" id="dice-el" onclick="doRoll()">${DICE_FACES[dice-1]}</span>
+      <button class="roll-btn" id="roll-btn" onclick="doRoll()">${cp.char}·${cp.name} 掷骰</button>
+    </div>
+    <div class="panel-box">
+      <h3>📜 朝廷命令</h3>
+      ${evHtml}
+    </div>
+    <div class="panel-box">
+      <h3>📋 仕途档案</h3>
+      <div class="log-scroll">${logHtml}</div>
+    </div>
+  </div>
+</div>`;
+}
+
+// ============================
+//  核心：已删除图片
+// ============================
+function buildBoardHTML(players, currentIdx) {
+  const posMap = {};
+  OFFICES.forEach((o, i) => {
+    const key = `${o.gridPos[0]},${o.gridPos[1]}`;
+    posMap[key] = i;
+  });
+  const cells = Array.from({length: GRID_SIZE}, (_, r) =>
+    Array.from({length: GRID_SIZE}, (_, c) => {
+      const key = `${r},${c}`;
+      const idx = posMap[key];
+      return { r, c, idx };
+    })
+  );
+  let rows = "";
   for (let r = 0; r < GRID_SIZE; r++) {
     for (let c = 0; c < GRID_SIZE; c++) {
       if (r===4 && c===4) {
-        rows += `<div class="center-block" style="grid-column:span 3; grid-row:span 3"><div class="big-title">三公</div></div>`;
+        const playersInFinish = players.filter(p => {
+          const o = OFFICES[p.pos];
+          return o && (o.special==="finish"||o.special==="finish-zone");
+        });
+        const tokHtml = playersInFinish.map(p=>
+          `<span class="token" style="background:${p.color}">${p.char}</span>`).join("");
+        rows += `<div class="center-block" style="grid-column:5/8;grid-row:5/8;">
+          <div class="big-title">三　公</div>
+          <div style="font-size:9px;color:#5A1A00;margin-bottom:4px;text-align:center">位极人臣·功德圆满</div>
+          <div class="center-row">
+            <div class="san-gong"><div class="sg-name">太保</div><div class="sg-rank">从一品</div></div>
+            <div class="san-gong" style="border-color:#C8963C;background:#fff3e0"><div class="sg-name">太傅</div><div class="sg-rank">从一品</div></div>
+            <div class="san-gong" style="border-color:#8B1A1A;background:#f8e8d0"><div class="sg-name">太师</div><div class="sg-rank">正一品</div></div>
+          </div>
+          ${tokHtml?`<div class="tokens-row" style="margin-top:4px">${tokHtml}</div>`:""}
+        </div>`;
         continue;
       }
-      if (r>=4 && r<=6 && c>=4 && c<=6) continue;
-
-      const idx = posMap[`${r},${c}`];
+      if ((r>=4&&r<=6)&&(c>=4&&c<=6)) continue;
+      const { idx } = cells[r][c];
+      if (idx === undefined || idx === null || idx < 0) {
+        rows += `<div class="cell" style="background:#f5e8c888;grid-column:${c+1};grid-row:${r+1}"></div>`;
+        continue;
+      }
       const off = OFFICES[idx];
-      const here = G.players.filter(p => p.pos === idx);
-      const tokens = here.map(p => `<span class="token" style="background:${p.color}">${p.char}</span>`).join("");
-      
-      rows += `<div class="cell" style="grid-column:${c+1}; grid-row:${r+1}">
-        <div class="cell-inner">
-          <div class="c-rank">${off?off.rank:""}</div>
-          <div class="c-name">${off?off.name:""}</div>
-          <div>${tokens}</div>
-        </div>
-      </div>`;
+      if (!off) { rows += `<div class="cell" style="grid-column:${c+1};grid-row:${r+1}"></div>`; continue; }
+      const here = players.filter(p => p.pos === idx);
+      const tokHtml = here.map(p=>
+        `<span class="token" style="background:${p.color}">${p.char}</span>`).join("");
+      const tierBgs = ["#e8f0d8","#f5e8c8","#eee0b8","#e8d8b0","#e0c890","#f8d8c0","#f8c8a8","#f5e0d0"];
+      let bg = `background:${tierBgs[Math.min(off.tier,7)]}`;
+      let extraStyle = "";
+      if (off.special==="start") extraStyle = "border:1.5px solid #5A8A3A !important;background:#d8ecc8 !important;";
+      if (off.special==="bonus") extraStyle = "border:1.5px solid #C8963C !important;background:#fff3cc !important;";
+      const displayName = off.name.replace('\n','');
+      const nameLines = off.name.split('\n');
+      rows += `
+        <div class="cell" style="${bg};${extraStyle};grid-column:${c+1};grid-row:${r+1}" onclick="cellClick(${idx})" title="${off.name}·${off.rank}：${off.desc}">
+          <div class="cell-inner">
+            <div class="c-rank">${off.rank}</div>
+            ${nameLines.map(l=>`<div class="c-name">${l}</div>`).join("")}
+            ${here.length?`<div class="tokens-row">${tokHtml}</div>`:""}
+          </div>
+        </div>`;
     }
   }
-
-  return `<div class="layout">
-    <div class="board-area">
-      <div class="outer-wrapper">
-        <div class="top-strip"><div class="top-title">升官图</div></div>
-        <div class="board-grid">${rows}</div>
-      </div>
-    </div>
-    <div class="control-panel">
-      <div class="panel-box">
-        <h3>当前角色</h3>
-        <div style="color:${cp.color}; font-weight:bold">${cp.char}·${cp.name}</div>
-        <div>位置：${OFFICES[cp.pos].name}</div>
-      </div>
-      <div class="panel-box">
-        <h3>掷骰</h3>
-        <div class="big-dice" id="dice-el">${DICE_FACES[G.dice-1]}</div>
-        <button class="roll-btn" onclick="doRoll()">掷骰子</button>
-      </div>
-      <div class="panel-box" style="grid-column: span 2">
-        <h3>仕途记录</h3>
-        <div class="log-scroll">${G.log.map(l => `<div>${l}</div>`).join("")}</div>
-      </div>
-    </div>
-  </div>`;
+  return `
+<div class="outer-wrapper">
+  <div class="top-strip">
+    <div class="corner-text">起</div>
+    <div class="top-title">升 官 圖</div>
+    <div class="corner-text">状元</div>
+  </div>
+  <div class="board-frame">
+    <div class="board-grid">${rows}</div>
+  </div>
+</div>`;
 }
 
+function cellClick(idx) {
+  const off = OFFICES[idx];
+  if (!off) return;
+  console.log(off.name, off.rank, off.desc);
+}
 function doRoll() {
   if (G.rolling) return;
   G.rolling = true;
-  let count = 0;
-  const timer = setInterval(() => {
-    document.getElementById("dice-el").innerText = DICE_FACES[Math.floor(Math.random()*6)];
-    if (++count > 10) {
-      clearInterval(timer);
-      const val = Math.floor(Math.random()*6) + 1;
-      const cats = ["德","才","功","德","才","赃"];
-      const cat = cats[val-1];
-      const ev = EVENTS[cat][0];
-      const p = G.players[G.current];
-      p.pos = Math.max(0, Math.min(OFFICES.length-1, p.pos + ev.steps));
-      G.log.unshift(`${p.name}: ${ev.text} (${ev.steps})`);
-      if (p.pos === OFFICES.length-1) G.screen = "win";
-      G.current = (G.current + 1) % G.players.length;
-      G.rolling = false;
-      render();
+  const btn = document.getElementById("roll-btn");
+  if (btn) btn.disabled = true;
+  let cnt = 0;
+  const iv = setInterval(() => {
+    const f = Math.floor(Math.random()*6);
+    const el = document.getElementById("dice-el");
+    if (el) el.textContent = DICE_FACES[f];
+    cnt++;
+    if (cnt >= 10) {
+      clearInterval(iv);
+      const final = Math.floor(Math.random()*6)+1;
+      processRoll(final);
     }
-  }, 50);
+  }, 70);
+}
+function processRoll(dv) {
+  const p = G.players[G.current];
+  const cat = getCategory(dv);
+  const ev = pickEvent(cat);
+  let np = p.pos + ev.steps;
+  if (np < 0) np = 0;
+  const maxPos = OFFICES.length - 1;
+  if (np > maxPos) np = maxPos;
+  p.pos = np;
+  G.dice = dv;
+  G.lastEvent = ev;
+  const off = OFFICES[np];
+  G.log.unshift(`${p.char}·${p.name}：${ev.text} → ${off.name.replace('\n','·')}(${off.rank})`);
+  if (off.special === "finish") {
+    G.winner = p;
+    G.screen = "win";
+    G.rolling = false;
+    render();
+    return;
+  }
+  G.current = (G.current+1) % G.players.length;
+  G.rolling = false;
+  render();
 }
 
 render();
